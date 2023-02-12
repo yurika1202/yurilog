@@ -1,0 +1,7 @@
+{
+  "extends": ["stylelint-config-prettier", "stylelint-config-recess-order", "stylelint-config-standard"],
+  "rules": {},
+  "ignoreFiles": ["node_modules/*"],
+  "defaultSeverity": "error",
+  "customSyntax": "postcss-html"
+}

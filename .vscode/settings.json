@@ -1,0 +1,21 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.fixAll.stylelint": true
+  },
+  "files.eol": "\n",
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  "prettier.documentSelectors": ["**/*.astro"],
+  "stylelint.validate": ["css", "scss", "astro"],
+  "eslint.validate": ["javascript", "javascriptreact", "astro", "typescript"],
+  "markuplint.enable": true,
+  "markuplint.debug": true,
+  "cSpell.words": ["astro", "tabindex", "stylelint"],
+  "html.format.wrapAttributes": "preserve"
+}
