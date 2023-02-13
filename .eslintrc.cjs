@@ -4,7 +4,7 @@ module.exports = {
     es2021: true,
   },
   extends: ['plugin:astro/recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
-  ignorePatterns: ['build'],
+  ignorePatterns: ['dist'],
   overrides: [
     {
       files: ['*.astro'],
