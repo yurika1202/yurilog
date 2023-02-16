@@ -1,0 +1,33 @@
+---
+import type { SiteMeta } from '@/types';
+import siteConfig from '@/config';
+import BaseHead from '@/components/BaseHead';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+
+interface Props {
+  meta: SiteMeta;
+}
+const {
+  meta: {
+    title,
+    description = siteConfig.description,
+    author = siteConfig.author,
+    ogImage = siteConfig.ogImage,
+  },
+} = Astro.props as Props;
+---
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#">
+    <BaseHead title={title} description={description} author={author} ogImage={ogImage} />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
