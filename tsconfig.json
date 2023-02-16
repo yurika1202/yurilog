@@ -4,9 +4,10 @@
     "baseUrl": ".",
     "paths": {
       "@/components/*": ["src/components/*.astro"],
-      "@/layouts/*": ["src/layout/*.astro"],
-      "@/util": ["src/util.ts"],
-      "@/types": ["src/types.ts"]
+      "@/layouts/*": ["src/layouts/*.astro"],
+      "@/util": ["src/utils.ts"],
+      "@/types": ["src/types.ts"],
+      "@/config": ["src/config.ts"]
     },
     "target": "ESNext",
     "module": "ESNext",
