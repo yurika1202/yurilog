@@ -7,13 +7,11 @@ export type SiteMeta = {
 };
 
 export interface PostType {
-  frontmatter: {
-    layout: string;
-    title: string;
-    description: string;
-    pubDate: string;
-    minutes?: number;
-    tags?: string[];
-  };
-  url: string;
+  layout: string;
+  title: string;
+  description: string;
+  publishDate: string;
+  thumbnail?: string;
+  category: string;
+  tags?: string[];
 }

@@ -1,10 +1,14 @@
 ---
-layout: ../layouts/Post.astro
+layout: ../../layouts/Post.astro
 title: 【DartSass】カラー管理とフォント周りを考える
 description:
 publishDate: 2022/04/09
-thumbnail:
-tags: [sass, カラー管理]
+image: {
+  src: thumbnail/,
+  alt: カラー管理とフォント周りを考える
+}
+category: coding
+tags: ['sass', 'カラー管理']
 draft: false
 ---
 

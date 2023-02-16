@@ -5,7 +5,7 @@
     "paths": {
       "@/components/*": ["src/components/*.astro"],
       "@/layouts/*": ["src/layouts/*.astro"],
-      "@/util": ["src/utils.ts"],
+      "@/utils/*": ["src/utils/*.ts"],
       "@/types": ["src/types.ts"],
       "@/config": ["src/config.ts"]
     },

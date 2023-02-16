@@ -1,0 +1,12 @@
+---
+import { getFormattedDate } from '@/utils/date';
+
+const { post } = Astro.props;
+
+const date = new Date(post.data.publishDate);
+const datetime = date.toISOString();
+const postDate = getFormattedDate(date);
+---
+
+<time datetime={datetime}>{postDate}</time>
+<a href={`/blog/${post.slug}/`}>{post.data.title}</a>

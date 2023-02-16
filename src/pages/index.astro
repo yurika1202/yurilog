@@ -1,5 +1,36 @@
 ---
+import { getCollection } from 'astro:content';
+import { sortedPosts } from '@/utils/post';
 import BaseLayout from '@/layouts/Base';
+import TagList from '@/components/TagList';
+import PostCard from '@/components/PostCard';
+
+const meta = {
+  title: '',
+};
+
+const allPosts = await getCollection('blog');
+const sotedAllPosts = sortedPosts(allPosts);
 ---
 
-<BaseLayout meta={{ title: '' }} />
+<BaseLayout meta={meta}>
+  <div class="posts">
+    <ul>
+      {
+        sotedAllPosts.map(post => (
+          <li>
+            <PostCard {post} />
+          </li>
+        ))
+      }
+    </ul>
+  </div><!-- /.posts -->
+  <TagList {allPosts} />
+</BaseLayout>
+
+<style>
+  li {
+    display: flex;
+    gap: var(--size-space-md);
+  }
+</style>
