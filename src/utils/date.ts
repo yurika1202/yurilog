@@ -6,7 +6,7 @@
  * @returns
  */
 export function getFormattedDate(
-  date: string | number | Date,
+  date: string,
   options: Intl.DateTimeFormatOptions = {},
   locale: Intl.LocalesArgument = 'ja-JP'
 ) {

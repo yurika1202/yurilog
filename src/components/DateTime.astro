@@ -1,0 +1,10 @@
+---
+import { getFormattedDate } from '@/utils/date';
+const { date } = Astro.props;
+
+const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+const datetime = jstDate.toISOString().split('Z')[0] + '+09:00';
+const postDate = getFormattedDate(date);
+---
+
+<time datetime={datetime}>{postDate}</time>
