@@ -5,7 +5,7 @@ import type { CollectionEntry } from 'astro:content';
  * @param posts ソート対象の配列posts
  * @returns ソート処理後に上書きした配列posts
  */
-export const sortedPosts = (posts: CollectionEntry<'blog'>[]) => {
+export const sortedPosts = (posts: CollectionEntry<'post'>[] = []) => {
   return posts.sort(
     (a, b) => new Date(b.data.publishDate).valueOf() - new Date(a.data.publishDate).valueOf()
   );
@@ -15,9 +15,9 @@ export const sortedPosts = (posts: CollectionEntry<'blog'>[]) => {
  * タグを取得
  * @param posts タグ取得対象のpost
  */
-export const getTags = (posts: CollectionEntry<'blog'>[]) => {
+export const getTags = (posts: CollectionEntry<'post'>[] = []) => {
   const tags = new Set<string>();
-  posts.map(post => {
+  posts.forEach(post => {
     post.data.tags.map(tag => tags.add(tag));
   });
   return Array.from(tags);

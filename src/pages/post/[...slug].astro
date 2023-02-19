@@ -1,0 +1,20 @@
+---
+import { CollectionEntry, getCollection } from 'astro:content';
+import PostLayout from '@/layouts/Post';
+
+export async function getStaticPaths() {
+  const posts: CollectionEntry<'post'>[] = await getCollection('post');
+  const params = posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+  return params;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<PostLayout {...post.data}>
+  <Content />
+</PostLayout>

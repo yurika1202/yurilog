@@ -10,7 +10,7 @@ interface Props {
 }
 const {
   meta: {
-    title,
+    title = siteConfig.title,
     description = siteConfig.description,
     author = siteConfig.author,
     ogImage = siteConfig.ogImage,

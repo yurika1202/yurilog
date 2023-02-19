@@ -1,0 +1,26 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '@/layouts/Base';
+import DateTime from '@/components/DateTime';
+
+type Props = CollectionEntry<'post'>['data'];
+
+const { title, description, publishDate, updatedDate, image } = Astro.props;
+
+const meta = {
+  title: title,
+  description: description,
+};
+---
+
+<BaseLayout meta={meta}>
+  <article>
+    <h1>{title}</h1>
+    <div class="thumbnail">
+      <img src="" alt="" />
+    </div><!-- /.thumbnail -->
+    <div class="entry">
+      <slot />
+    </div><!-- /.entry -->
+  </article>
+</BaseLayout>
