@@ -9,22 +9,22 @@ const meta = {
   title: '',
 };
 
-const allPosts = await getCollection('blog');
+const allPosts = await getCollection('post');
 const sotedAllPosts = sortedPosts(allPosts);
 ---
 
 <BaseLayout meta={meta}>
-  <div class="posts">
+  <div class="blog">
     <ul>
       {
         sotedAllPosts.map(post => (
           <li>
-            <PostCard {post} />
+            <PostCard post={post} />
           </li>
         ))
       }
     </ul>
-  </div><!-- /.posts -->
+  </div><!-- /.blog -->
   <TagList {allPosts} />
 </BaseLayout>
 
