@@ -1,0 +1,43 @@
+---
+import Base from '@/layouts/Base';
+
+const meta = {
+  title: 'About',
+  description: 'ゆりかの自己紹介。もくもくとコーディングしてる時間がだいすき。',
+};
+---
+
+<Base meta={meta}>
+  <h1>About</h1>
+  <p>
+    子育て中のアラサー主婦。お仕事はECサイトの運営。<br />
+    趣味でコーディングの勉強したり、デザインの勉強してみたりしてます。
+  </p>
+  <p>2023年の目標は</p>
+  <ul class="aim">
+    <li>アクセシビリティの知見を広げたい</li>
+    <li>デザイン力をつけたい</li>
+    <li>TypeScriptを理解したい</li>
+    <li>文章力向上と言語化習慣のためにブログ更新を月4はしたい</li>
+  </ul>
+  <div class="link">
+    <ul>
+      <li><a href="https://twitter.com/bnku212">Twitter</a></li>
+      <li><a href="https://github.com/yurika1202">GitHub</a></li>
+      <li><a href="https://yurika1202.github.io/portfolio/">Portfolio</a></li>
+    </ul>
+  </div><!-- /.link -->
+  <p>なにかご連絡がありましたら、TwitterのDMへお願いします。</p>
+</Base>
+
+<style>
+  .aim li {
+    list-style-type: disc;
+    list-style-position: inside;
+  }
+
+  .link ul {
+    display: flex;
+    gap: var(--size-space-sm);
+  }
+</style>
