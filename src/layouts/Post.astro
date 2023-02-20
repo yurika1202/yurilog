@@ -12,9 +12,13 @@ const meta = {
 <BaseLayout meta={meta}>
   <article>
     <h1>{title}</h1>
-    <div class="thumbnail">
-      <img src={image.src} alt={image.alt} width="" height="" decoding="async" />
-    </div><!-- /.thumbnail -->
+    {
+      image && (
+        <div class="thumbnail">
+          <img src={image.src} alt={image.alt} width="" height="" decoding="async" />
+        </div>
+      )
+    }
     <div class="date">
       <DateTime date={publishDate} />
       {updatedDate && <DateTime date={updatedDate} />}
