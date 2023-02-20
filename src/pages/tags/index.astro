@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import { getTags } from '@/utils/post';
+import Base from '@/layouts/Base';
+
+const allPosts = await getCollection('post');
+const allTags = getTags(allPosts);
+
+const meta = {
+  title: 'Tags',
+  description: 'タグ一覧から記事をさがす',
+};
+---
+
+<Base meta={meta}>
+  <h1>Tag</h1>
+  <ul>
+    {
+      allTags.map(tag => (
+        <li>
+          <a href={`/tags/${tag}`}>{tag}</a>
+        </li>
+      ))
+    }
+  </ul>
+</Base>

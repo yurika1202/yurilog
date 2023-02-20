@@ -1,0 +1,46 @@
+---
+import { CollectionEntry, getCollection } from 'astro:content';
+import { getTags } from '@/utils/post';
+import Base from '@/layouts/Base';
+import PostCard from '@/components/PostCard';
+
+export async function getStaticPaths() {
+  const allPosts: CollectionEntry<'post'>[] = await getCollection('post');
+  const allTags = getTags(allPosts);
+  const params = allTags.map((tag: string) => {
+    const filterdPosts = allPosts.filter(post => post.data.tags.includes(tag));
+    return {
+      params: { tag },
+      props: { posts: filterdPosts },
+    };
+  });
+  return params;
+}
+
+interface Props {
+  posts: CollectionEntry<'post'>[];
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props as Props;
+
+const meta = {
+  title: `# ${tag} の記事一覧`,
+  description: `タグ # ${tag} の記事一覧`,
+};
+---
+
+<Base meta={meta}>
+  <h1>#{tag}の記事</h1>
+  <ul>
+    {
+      posts.map(post => (
+        <li>
+          <li>
+            <PostCard post={post} />
+          </li>
+        </li>
+      ))
+    }
+  </ul>
+</Base>
