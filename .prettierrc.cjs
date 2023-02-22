@@ -7,4 +7,18 @@ module.exports = {
   singleQuote: true,
   endOfLine: 'lf',
   arrowParens: 'avoid',
+  overrides: [
+    {
+      files: ['*.md', 'README'],
+      options: {
+        parser: 'markdown-nocjsp',
+      },
+    },
+    {
+      files: '*.mdx',
+      options: {
+        parser: 'mdx-nocjsp',
+      },
+    },
+  ],
 };
