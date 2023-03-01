@@ -15,7 +15,7 @@ module.exports = {
       },
     },
     {
-      files: '*.mdx',
+      files: ['*.mdx'],
       options: {
         parser: 'mdx-nocjsp',
       },

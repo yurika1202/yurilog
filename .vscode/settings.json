@@ -17,5 +17,8 @@
   "markuplint.enable": true,
   "markuplint.debug": true,
   "cSpell.words": ["astro", "tabindex", "stylelint"],
-  "html.format.wrapAttributes": "preserve"
+  "html.format.wrapAttributes": "preserve",
+  "files.associations": {
+    "*.mdx": "markdown"
+  }
 }
