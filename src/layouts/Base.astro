@@ -18,16 +18,31 @@ const {
 } = Astro.props as Props;
 ---
 
-<!DOCTYPE html>
-<html lang="ja">
-  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#">
-    <BaseHead title={title} description={description} author={author} ogImage={ogImage} />
-  </head>
-  <body>
-    <Header />
-    <main>
-      <slot />
-    </main>
-    <Footer />
-  </body>
-</html>
+<>
+  <html lang="ja">
+    <head
+      prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#"
+    >
+      <BaseHead title={title} description={description} author={author} ogImage={ogImage} />
+    </head>
+    <body>
+      <div class="ly_base">
+        <Header />
+        <main>
+          <slot />
+        </main>
+        <Footer />
+      </div><!-- /.ly_base -->
+    </body>
+  </html>
+</>
+
+<style>
+  .ly_base {
+    margin: 0 auto;
+    padding: 1rem;
+    width: 100%;
+    max-width: 960px;
+    height: 100%;
+  }
+</style>
