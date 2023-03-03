@@ -1,6 +1,20 @@
+---
+const path = Astro.url.pathname.slice(1);
+---
+
 <header>
   <div class="inner">
-    <h1><a href="/">yurilog.</a></h1>
+    {
+      path ? (
+        <div class="logo">
+          <a href="/">yurilog.</a>
+        </div>
+      ) : (
+        <h1 class="logo">
+          <a href="/">yurilog.</a>
+        </h1>
+      )
+    }
     <nav>
       <ul>
         <li><a href="/about">About</a></li>
@@ -11,6 +25,11 @@
 </header>
 
 <style>
+  .logo {
+    font-weight: bold;
+    font-size: 32px;
+  }
+
   ul {
     display: flex;
     gap: var(--size-space-sm);
