@@ -1,0 +1,222 @@
+.post {
+  /* color */
+  --c-block-a: 0.15;
+
+  /* size */
+  --size-heading-1: 1.75rem;
+  --size-heading-2: 1.5rem;
+  --size-heading-3: 1.25rem;
+  --size-heading-4: 1rem;
+  --size-caption: 0.75rem;
+
+  padding: var(--size-space-md) 0;
+}
+
+.post h2 {
+  font-weight: bold;
+  font-size: var(--size-heading-2);
+}
+
+.post h3 {
+  font-weight: bold;
+  font-size: var(--size-heading-3);
+}
+
+.post h4 {
+  margin-top: 2em;
+  font-weight: bold;
+  font-size: var(--size-heading-4);
+}
+
+.post h1,
+.post h2,
+.post h3 {
+  margin-top: 2.5em;
+  padding-bottom: 0.3em;
+}
+
+.post p,
+.post a,
+.post iframe {
+  margin-top: 1.2em;
+}
+
+.post li a,
+.post table a {
+  margin: 0;
+}
+
+.post p a {
+  margin-top: 0;
+}
+
+.post ul,
+.post ol {
+  margin: 0.8em 0;
+}
+
+.post li {
+  margin-left: 1em;
+  padding-left: 0.2em;
+}
+
+.post li ul,
+.post li ol,
+.post li p {
+  margin: 0;
+}
+
+.post ul li {
+  list-style: disc outside;
+}
+
+.post li > ul li {
+  list-style: circle outside;
+}
+
+.post ol li {
+  list-style: decimal outside;
+}
+
+.post li > ol li {
+  list-style: lower-alpha outside;
+}
+
+blockquote {
+  position: relative;
+  margin-top: 1em;
+  padding: 0.5em 1.2em;
+}
+
+blockquote::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  background: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-light70-l), var(--c-primary-a));
+  width: 2px;
+  height: 100%;
+  content: '';
+}
+
+blockquote p {
+  margin: 0 !important;
+}
+
+blockquote > cite {
+  font-size: 0.75em;
+}
+
+code,
+pre {
+  font-size: 0.875rem;
+  font-family: var(--f-family-code);
+}
+
+:not(pre) > code {
+  margin: 0 0.3em;
+  border-radius: 3px;
+  background: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-light90-l), var(--c-primary-a));
+  padding: 0.2em 0.3em;
+  font-size: 0.875rem;
+}
+
+pre {
+  position: relative;
+  z-index: 2;
+  margin-top: 0.2em;
+  border-radius: 0 5px 5px 5px;
+  padding: 0.8em 1.2em;
+}
+
+.post pre + p {
+  margin-top: 1.8em;
+}
+
+.post small {
+  display: block;
+  position: relative;
+  top: 4px;
+  margin-top: 1em;
+  border-radius: 5px 5px 0 0;
+  background: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-dark30-l), var(--c-primary-a));
+  padding: 0.2em 1em;
+  width: fit-content;
+  color: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-light90-l), var(--c-primary-a));
+  font-size: 0.75rem;
+}
+
+table {
+  margin-top: 1em;
+  border: 1px solid
+    hsla(var(--c-primary-h), var(--c-primary-s), var(--c-light80-l), var(--c-primary-a));
+  border-radius: 5px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+
+thead {
+  border-radius: 5px 5px 0 0;
+  background: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-light80-l), var(--c-primary-a));
+}
+
+thead tr th,
+tbody tr td {
+  padding: 0 0.8em;
+}
+
+thead tr th:not(:last-of-type) {
+  border-right: 1px solid
+    hsla(var(--c-primary-h), var(--c-primary-s), var(--c-gray70-l), var(--c-primary-a));
+}
+
+thead tr th {
+  text-align: left;
+}
+
+tbody {
+  border: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-light80-l), var(--c-primary-a));
+}
+
+tbody tr:not(:last-child) td {
+  border-bottom: 1px solid
+    hsla(var(--c-primary-h), var(--c-primary-s), var(--c-light80-l), var(--c-primary-a));
+}
+
+tbody tr td:not(:last-child) {
+  border-right: 1px solid
+    hsla(var(--c-primary-h), var(--c-primary-s), var(--c-light80-l), var(--c-primary-a));
+}
+
+table.table_col tbody th {
+  background: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-light80-l), var(--c-primary-a));
+}
+
+table.table_col tbody tr th {
+  padding: 0 0.8em;
+}
+
+table.table_col tbody tr:not(:last-of-type) th {
+  border-bottom: 1px solid
+    hsla(var(--c-primary-h), var(--c-primary-s), var(--c-gray70-l), var(--c-primary-a));
+}
+
+.post h1 + table,
+.post h2 + table,
+.post h3 + table,
+.post h4 + table {
+  margin-top: 0;
+}
+
+.post img {
+  margin: 0 auto;
+  border: solid 1px
+    hsla(var(--c-primary-h), var(--c-primary-s), var(--c-primary-l), var(--c-primary-a));
+  border-radius: 5px;
+  max-width: 100%;
+}
+
+.cp_embed_wrapper + p {
+  margin-top: 0.4em;
+}

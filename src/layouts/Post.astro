@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/Base';
 import DateTime from '@/components/DateTime';
+import '../styles/post.css';
 
 const { title, description, publishDate, updatedDate, image } = Astro.props;
 const meta = {
@@ -20,11 +21,27 @@ const meta = {
       )
     }
     <div class="date">
-      <DateTime date={publishDate} />
-      {updatedDate && <DateTime date={updatedDate} />}
+      <DateTime date={publishDate} type="publish" />
+      {updatedDate && <DateTime date={updatedDate} type="updata" />}
     </div><!-- /.date -->
-    <div class="entry">
+    <div class="post">
       <slot />
-    </div><!-- /.entry -->
+    </div><!-- /.post -->
   </article>
 </BaseLayout>
+
+<style>
+  article {
+    margin-top: var(--size-space-xl);
+  }
+  h1 {
+    font-weight: bold;
+    font-size: 1.75rem;
+  }
+
+  .date {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--size-space-md);
+  }
+</style>

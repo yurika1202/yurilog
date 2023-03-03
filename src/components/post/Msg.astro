@@ -1,0 +1,89 @@
+---
+const { type, date } = Astro.props;
+
+interface Props {
+  type: string;
+  date: Date;
+}
+
+const className = `msg ${type}`;
+// const title = type.charAt(0).toUpperCase() + type.slice(1);
+---
+
+<div class={className}>
+  {date && <p class="msg_title msg_date">{date} 追記</p>}
+  {type !== 'add' ? <span class="msg_title" /> : ''}
+  <slot />
+</div>
+
+<style>
+  .msg {
+    position: relative;
+    margin: 3em 0;
+    border-top: 1px solid
+      hsla(var(--c-primary-h), var(--c-gray-s), var(--c-gray30-l), var(--c-primary-a));
+    border-bottom: 1px solid
+      hsla(var(--c-primary-h), var(--c-gray-s), var(--c-gray30-l), var(--c-primary-a));
+    padding: var(--size-space-sm) var(--size-space-sm) var(--size-space-md);
+  }
+
+  .msg_title {
+    display: inline-block;
+    position: absolute;
+    top: -1rem;
+    left: 0;
+    margin-top: 0 !important;
+    border-radius: 5px;
+    width: 3em;
+    height: 2.5em;
+    font-size: 0.875rem;
+  }
+
+  .msg_title::before {
+    position: absolute;
+    margin: auto;
+    inset: 0;
+    width: 1.5em;
+    height: 1.5em;
+    content: '';
+  }
+
+  .msg_date {
+    background: hsla(var(--c-primary-h), var(--c-gray-s), var(--c-gray30-l), var(--c-primary-a));
+    padding: 0.2em 1em 0.2em 2em;
+    width: fit-content;
+    height: fit-content;
+    color: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-white-l), var(--c-primary-a));
+  }
+
+  .msg_date::before {
+    margin-left: 0.5em;
+    background: url(/images/icon/pin.svg) no-repeat center center / contain;
+    width: 1em;
+    height: 1em;
+  }
+
+  .msg.info {
+    border-top: 1px solid
+      hsla(var(--c-blue-h), var(--c-primary-s), var(--c-primary-l), var(--c-primary-a));
+    border-bottom: 1px solid
+      hsla(var(--c-blue-h), var(--c-primary-s), var(--c-primary-l), var(--c-primary-a));
+  }
+
+  .msg.info > .msg_title {
+    background: hsla(var(--c-blue-h), var(--c-primary-s), var(--c-primary-l), var(--c-primary-a));
+    color: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-white-l), var(--c-primary-a));
+  }
+
+  .msg.info > .msg_title::before {
+    background: url(/images/icon/info.svg) no-repeat center center / contain;
+  }
+
+  .msg.warn > .msg_title {
+    background: hsla(var(--c-yel-h), var(--c-yel-s), var(--c-primary-l), var(--c-primary-a));
+  }
+
+  .msg.warn > .msg_title::before {
+    background: url(/images/icon/danger.svg) no-repeat center center / contain;
+  }
+</style>
