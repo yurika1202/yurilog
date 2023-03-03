@@ -1,10 +1,38 @@
 ---
 import { getFormattedDate } from '@/utils/date';
-const { date } = Astro.props;
+const { date, type } = Astro.props;
 
 const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
 const datetime = jstDate.toISOString().split('Z')[0] + '+09:00';
 const postDate = getFormattedDate(date);
 ---
 
-<time datetime={datetime}>{postDate}</time>
+<time datetime={datetime} class={type}>{postDate}</time>
+
+<style>
+  .publish,
+  .updata {
+    display: inline-block;
+    position: relative;
+    padding-left: 1.5em;
+  }
+
+  .publish::before,
+  .updata::before {
+    position: absolute;
+    top: calc(50% + 0.04em);
+    left: 0;
+    transform: translateY(-50%);
+    width: 1em;
+    height: 1em;
+    content: '';
+  }
+
+  .publish::before {
+    background: url(/images/icon/time.svg) no-repeat center center / contain;
+  }
+
+  .updata::before {
+    background: url(/images/icon/updata.svg) no-repeat center center / contain;
+  }
+</style>

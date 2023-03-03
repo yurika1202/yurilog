@@ -31,6 +31,7 @@
   --c-red-s: 70%;
   --c-yel-h: 60;
   --c-yel-s: 80%;
+  --c-blue-h: 216;
   --c-hover-a: 0.7;
 
   /* font */
@@ -38,6 +39,7 @@
     'BIZ UDPGothic', Meiryo, sans-serif;
   --f-family-p22: p22-mackinac-pro, serif;
   --f-family-degular: 'degular-display', sans-serif;
+  --f-family-code: 'source-code-pro', monospace;
   --f-size-base: 1rem;
 
   /* size */
@@ -68,8 +70,9 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   color: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-black-l), var(--c-primary-a));
-  line-height: 1.75;
+  line-height: 1.9;
   font-family: var(--f-family-base);
+  letter-spacing: 0.05em;
 }
 
 @supports (min-height: 100dvh) {
