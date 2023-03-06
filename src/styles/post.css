@@ -133,8 +133,7 @@ pre {
   margin-top: 1.8em;
 }
 
-.post small {
-  display: block;
+.post div[data-remark-code-title] {
   position: relative;
   top: 4px;
   margin-top: 1em;
