@@ -4,9 +4,11 @@ import DateTime from '@/components/DateTime';
 import '../styles/post.css';
 
 const { title, description, publishDate, updatedDate, image } = Astro.props;
+const postOgImage = `https://res.cloudinary.com/domr7evsg/image/upload/l_text:biz.woff2_50_bold_letter_spacing_5_line_spacing_20:${title},co_rgb:16131c,w_900,c_fit,g_north_west,x_147,y_200/v1678135119/ogp_jspwo7.jpg`;
 const meta = {
   title: title,
   description: description,
+  ogImage: postOgImage,
 };
 ---
 
