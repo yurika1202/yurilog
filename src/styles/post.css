@@ -55,19 +55,10 @@
   margin: 0.8em 0;
 }
 
-.post li {
-  margin-left: 1em;
-  padding-left: 0.2em;
-}
-
 .post li ul,
 .post li ol,
 .post li p {
   margin: 0;
-}
-
-.post ul li {
-  list-style: disc outside;
 }
 
 .post li > ul li {

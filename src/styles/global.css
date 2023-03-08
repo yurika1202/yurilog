@@ -90,9 +90,26 @@ a {
 }
 
 a {
-  text-decoration: none;
+  color: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-primary-l), var(--c-primary-a));
+  text-decoration: underline;
+}
+
+a[target='_blank']::after {
+  display: inline-block;
+  vertical-align: text-top;
+  margin-left: 0.3em;
+  background: url(/images/icon/link.svg) no-repeat center center / contain;
+  width: 1em;
+  height: 1em;
+  content: '';
+}
+
+a p {
+  margin: 0;
 }
 
 li {
-  list-style: none;
+  margin-left: 1em;
+  padding-left: 0.1em;
+  list-style: disc outside;
 }
