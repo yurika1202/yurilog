@@ -90,6 +90,7 @@ a {
 }
 
 a {
+  transition: color 0.4s ease-out;
   color: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-primary-l), var(--c-primary-a));
   text-decoration: underline;
 }
@@ -102,6 +103,11 @@ a[target='_blank']::after {
   width: 1em;
   height: 1em;
   content: '';
+}
+
+a:hover,
+a:focus {
+  color: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-primary-l), var(--c-hover-a));
 }
 
 a p {
