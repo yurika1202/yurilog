@@ -79,8 +79,15 @@ const className = `msg ${type}`;
     background: url(/images/icon/info.svg) no-repeat center center / contain;
   }
 
+  .msg.warn {
+    border-top: 1px solid
+      hsla(var(--c-red-h), var(--c-primary-s), var(--c-primary-l), var(--c-primary-a));
+    border-bottom: 1px solid
+      hsla(var(--c-red-h), var(--c-primary-s), var(--c-primary-l), var(--c-primary-a));
+  }
+
   .msg.warn > .msg_title {
-    background: hsla(var(--c-yel-h), var(--c-yel-s), var(--c-primary-l), var(--c-primary-a));
+    background: hsla(var(--c-red-h), var(--c-primary-s), var(--c-primary-l), var(--c-primary-a));
   }
 
   .msg.warn > .msg_title::before {

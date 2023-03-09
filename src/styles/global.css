@@ -90,6 +90,7 @@ a {
 }
 
 a {
+  transition: color 0.4s ease-out;
   color: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-primary-l), var(--c-primary-a));
   text-decoration: underline;
 }
@@ -104,11 +105,20 @@ a[target='_blank']::after {
   content: '';
 }
 
+a:hover,
+a:focus {
+  color: hsla(var(--c-primary-h), var(--c-primary-s), var(--c-primary-l), var(--c-hover-a));
+}
+
 a p {
   margin: 0;
 }
 
-li {
+ul li {
+  list-style: none;
+}
+
+ul.list-disc li {
   margin-left: 1em;
   padding-left: 0.1em;
   list-style: disc outside;
