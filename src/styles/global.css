@@ -114,7 +114,11 @@ a p {
   margin: 0;
 }
 
-li {
+ul li {
+  list-style: none;
+}
+
+ul.list-disc li {
   margin-left: 1em;
   padding-left: 0.1em;
   list-style: disc outside;
