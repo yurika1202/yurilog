@@ -7,11 +7,15 @@ const path = Astro.url.pathname.slice(1);
     {
       path ? (
         <div class="logo">
-          <a href="/">yurilog.</a>
+          <a href="/">
+            <img src="/images/logo.svg" alt="ブログタイトル yurilog." width="250" height="60" />
+          </a>
         </div>
       ) : (
         <h1 class="logo">
-          <a href="/">yurilog.</a>
+          <a href="/">
+            <img src="/images/logo.svg" alt="ブログタイトル yurilog." width="250" height="60" />
+          </a>
         </h1>
       )
     }
@@ -33,5 +37,11 @@ const path = Astro.url.pathname.slice(1);
   ul {
     display: flex;
     gap: var(--size-space-sm);
+  }
+
+  ul li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 </style>
