@@ -1,0 +1,214 @@
+---
+title: 【dialog】クリックイベントで指定ボタンへオートフォーカス
+publishDate: 2022/08/01
+tags: ['dialog', 'JavaScript']
+draft: false
+---
+
+IEが召されて`dialog`が気兼ねなく使えるようになったので、モーダル実装にチャレンジしてみてます。  
+その際につまったのが「閉じるボタンへのオートフォーカス」。  
+あーしてもこーしても、フォーカスがまったくあたらない🤤  
+（先に言ってしまうと、ほんとうにしょうもない勘違いのせいでした🥺てへ）
+
+## 実装目標
+
+- モーダルを開いたら、フォーカスをモーダル内の閉じるボタンへ移したい
+
+## つまったところ
+
+解決前の簡易デモはこちら。
+
+<p
+  class="codepen"
+  data-height="300"
+  data-default-tab="html,result"
+  data-slug-hash="RwMLRMy"
+  data-user="yurika1202"
+  style="height: 300px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;"
+>
+  <span>
+    See the Pen <a href="https://codepen.io/yurika1202/pen/RwMLRMy">dialog - autofocus (NG Ver.)</a>{' '}
+    by Yurika (<a href="https://codepen.io/yurika1202">@yurika1202</a>) on{' '}
+    <a href="https://codepen.io">CodePen</a>.
+  </span>
+</p>
+<script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
+
+動作は一応しているものの…閉じるボタンへのオートフォーカスが達成できていないので、モーダルを閉じるまでの動きに1アクション追加されてしまいます。よろしくない🙄  
+フォーカスを強制的にあてるため、閉じるボタンに`focus()`メソッドを呼び出していますが効いていません。
+
+## 解決までの糸口
+
+ひとまずこちらが解決後の簡易デモです。
+
+<p
+  class="codepen"
+  data-height="300"
+  data-default-tab="html,result"
+  data-slug-hash="mdxBrGb"
+  data-user="yurika1202"
+  style="height: 300px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;"
+>
+  <span>
+    See the Pen <a href="https://codepen.io/yurika1202/pen/mdxBrGb">dialog - autofocus (OK Ver.)</a>{' '}
+    by Yurika (<a href="https://codepen.io/yurika1202">@yurika1202</a>) on{' '}
+    <a href="https://codepen.io">CodePen</a>.
+  </span>
+</p>
+<script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
+
+モーダルを開くと、きちんと閉じるボタンへフォーカスが当たっています🥳  
+結論からいうと、モーダル開閉には`dialog`のメソッドを使えば万事解決でした。無知。  
+そこにいたるまでオロオロ記録です…
+
+### `setTimeout()`の上書き
+
+まずググってたどりついた先は、`setTimeout`の中で`focus()`メソッドを呼び出す方法。
+
+```js title="sample.js"
+setTimeout(() => {
+  this.closeBtn.focus();
+}, 0);
+```
+
+一応フォーカスは当たるようになったものの…
+
+- `setTimeout`を使用しての解決法は、昔のFirefoxでのバグへの対処だったりで使われているもの？（他記事もググってみたけど、どれも古い記事ばかり）
+  [【js】firefoxでfocusイベントが動かない - Qiita](https://qiita.com/mk-tool/items/4db8c91603b7c165d909)
+- モーダルを開くタイミングによってはフォーカスが当たらない
+
+ただフォーカスはあてれるようになったので、ひとまず`setTimeout`を使いつつ解決策をさらに探ってみることに。
+
+### `visibility`ではなく、`display`で要素の表示を制御
+
+先ほどの腑に落ちないところ2つ目の「モーダルを開くタイミングによってはフォーカスが当たらない」をどうにかしてみるため、原因を考えてみる。  
+おそらく非表示だった要素を表示させたとき（モーダルを開いたとき）に、DOMがレンダリングされるタイミング次第でフォーカスの挙動が変わっている。  
+ので、試しに`visibility:hidden;`ではなく、`display:none;`に変更してみる。
+
+フォーカスあたるー－－！  
+どんなときでもフォーカスあたるー－－！
+
+だがしかし、表示時にアニメーションつけたいしJSではなく`transition`でなんとかしたいごにょごにょ…  
+なのでもうちょっと別方法を考えてみる。
+
+### `dialog`の開閉はメソッドが用意されている
+
+なんか詰まってきたので、原点回帰として改めてMDNを読んでみる。  
+…モーダル開閉のためのメソッドあるやないかーい🙃  
+…モーダルにつける`open`属性も記述法違うやないかーい🙃  
+書き直してみると上手くフォーカスもあたる。
+
+```js title="sample.js"
+openBtn.addEventListener('click', () => {
+  dialog.showModal();
+});
+
+closeBtn.addEventListener('click', () => {
+  dialog.close();
+});
+```
+
+- `showModal()`  
+  モーダルを開く。  
+  モーダル外へのアクセスが不可になり、Escapeキーで閉じることが可能。  
+  疑似要素`::backdrop`で背景も自動でつけてくれるし、複数モーダルがあった場合でも常に最上部へ表示してくれる。  
+  モーダル外のコンテンツのスクリーンリーダの読み上げもしない。
+- `show()`  
+  モーダルを開く。  
+  モーダル外へのアクセスが可能。  
+  出番はモーダル外に閉じるボタンがあったりするとき？（あるのか？）
+- `close()`  
+  モーダルを閉じる。
+
+```html title="sample.html"
+<dialog class="dialog" open>
+  <button class="closeBtn" type="button">Close</button>
+  <p>Hello!!!</p>
+</dialog>
+```
+
+`open`属性については、`showModal()`または`show()`メソッドが実行されたタイミングで`dialog`へ付与されるので、特にJSなどで操作する必要なし。
+
+### `transition`で表示アニメーションさせるには
+
+フォーカス問題は解決されたのですが、`dialog`はブラウザのデフォルト設定として`display:none;`で表示・非表示をコントロールさせているので、これをどうにかしたい！
+
+```css title="user agent stylesheet"
+dialog {
+  display: block;
+  ...
+}
+dialog:not([open]) {
+  display: none;
+}
+```
+
+`transition`を効かせるため、`display`を`block`へ上書きします。  
+そして`visibility`と`opacity`で非表示に。
+
+```css title="sample.css"
+dialog {
+  visibility: visible;
+  opacity: 1;
+  transition: visibility 0.4s ease-out, opacity 0.4s ease-out;
+  ...
+}
+dialog:not([open]) {
+  display: block;
+  visibility: hidden;
+  opacity: 0;
+}
+```
+
+これで実行してみると、アニメーションは効くもののオートフォーカスが無効に…🤔  
+う～んと思ったのですが、よくよく考えてみると`visibility`プロパティに`transition`で`duration`を仕掛けていたので、可視状態になるまでに時間がかかっている！  
+つまり完全に可視状態にならないとフォーカスはあたらないので、`duration`を`0`に設定しなおしてみる。
+
+```css title="sample.css"
+dialog {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.4s ease-out; /* 変更点 */
+  /* transition: visibility 0s ease-out, opacity 0.4s ease-out;と同意味 */
+  ...
+}
+dialog:not([open]) {
+  display: block;
+  visibility: hidden;
+  opacity: 0;
+}
+```
+
+これで無事フォーカスも当たるし、`transition`も効いてる～～！
+
+<p
+  class="codepen"
+  data-height="300"
+  data-default-tab="html,result"
+  data-slug-hash="mdxBrGb"
+  data-user="yurika1202"
+  style="height: 300px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;"
+>
+  <span>
+    See the Pen <a href="https://codepen.io/yurika1202/pen/mdxBrGb">dialog - autofocus (OK Ver.)</a>{' '}
+    by Yurika (<a href="https://codepen.io/yurika1202">@yurika1202</a>) on{' '}
+    <a href="https://codepen.io">CodePen</a>.
+  </span>
+</p>
+<script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
+
+## おわり
+
+これでゴールとする「モーダルを開いたら、フォーカスをモーダル内の閉じるボタンへ移したい」を実装することができました🥳  
+だいぶ遠回りはしたけど、よき勉強になりました…（遠い目）  
+とりあえず次からは公式ドキュメントを穴が開くほど見るようにします。
+
+それにしても`dialog`要素が気兼ねなく使えるようになったおかげで、実装側がアクセシビリティに悩む時間が軽減されてて感動…
+
+それでは、 ☁️ぼんっ
+
+## 参考サイト
+
+- [MDN - dialog](https://developer.mozilla.org/ja/docs/Web/HTML/Element/dialog)
+- [W3C - Modal Dialog](https://www.w3.org/WAI/ARIA/apg/example-index/dialog-modal/dialog.html)
+- [Zenn - アクセシブルなモーダルダイアログの実装について考える（Yend724）](https://zenn.dev/yend724/articles/20220511-pc51v32llyzu8kws)

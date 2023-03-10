@@ -1,0 +1,227 @@
+---
+title: npm-scriptsでコンパイルする
+publishDate: 2022/09/13
+updatedDate: 2022/09/14
+tags: ['npm', '環境構築', 'Node.js']
+draft: false
+---
+
+import Msg from '../../../components/post/Msg.astro';
+
+これまでコンパイル関係はVSCodeの拡張機能に頼りきりでした。  
+しかし！拡張機能は卒業したい！コーダーぽくnpm-scriptで乗り切りたい！！！  
+最近npmに少し慣れてきたところなので、まずは簡単なところからチャレンジしてみます。
+
+## npm-scriptsとは
+
+npmで行うタスク処理のこと。  
+*package.json*のscriptsフィールドに、シェルスクリプトやエイリアスしたコマンドを登録・実行できる。  
+つまりWebpackなどのタスクランナーを使わずにタスク処理ができて軽量かつシンプル🙌  
+簡単なタスク処理を行いたいときに便利、ということです。
+
+## 今回の目標
+
+- SassとTypeScriptのコンパイルと圧縮
+- CSSにはベンダープレフィックスつけておきたい
+- そしてそれをファイルセーブするたびに実行してほしい🙄
+
+コンパイル前のファイル構成はこんな感じ。
+
+```title="Directory"
+└─src
+    ├─js
+    |  ├─...
+    |  └─main.js
+    └─sass
+        ├─...
+        └─style.scss
+```
+
+こやつらを*dist*へコンパイルしていきたい。
+
+```title="Directory"
+├─src
+|   ├─js
+|   |  ├─...
+|   |  └─main.ts
+|   └─sass
+|       ├─...
+|       └─style.scss
+└─dist
+    ├─js
+    |   └─main.js
+    └─css
+        └─style.css
+```
+
+## やってみる
+
+- Node - v16.15.1
+- npm - 8.12.1
+
+### Sass
+
+まずはSassをインストール。
+
+```title="command"
+npm i -D sass
+```
+
+Sassでやること終わり。
+
+### PostCSS
+
+CSSにベンダープレフィックスつけるautoprefixerは、PostCSSも必要なので一緒にインストール。  
+また、postcss-cliはPostCSSをコマンドで使うために必要なパッケージなのでインストール。
+
+```title="command"
+npm i -D postcss postcss-cli autoprefixer
+```
+
+PostCSSの設定ファイル（_postcss.config.cjs_）に、プラグインのautoprefixer使うよ～と記述。
+
+```jsx title="postcss.config.cjs"
+module.exports = {
+  plugins: {
+    autoprefixer: {},
+  },
+};
+```
+
+そして[browserslist](https://github.com/browserslist/browserslist)（サポートブラウザをリスト化したもの）を*package.json*へ記述。
+
+```json title="package.json"
+...
+},
+  "browserslist": [
+    "last 2 versions",
+    "> 5%",
+    "Firefox ESR",
+    "not dead"
+  ]
+}
+```
+
+ちなみに今回は…
+
+- 2つ前のバージョンまで
+- 使用率5%以上
+- FirefixESRも対応しといてね
+- 24か月間アップデートのないブラウザは除外ね
+
+という内容に設定してます。
+
+### TypeScript
+
+最後にTypeScriptをグローバル環境にインストール。
+
+```title="command"
+npm i -g typescript
+```
+
+設定ファイル（_tsconfig.json_）で、自分的に注意しておきたい箇所は…
+
+- noEmitはfalseになっているか
+- include（参照先）と outDir（出力先）を忘れずに
+- rootDir（出力時のディレクトリ階層参照先）も必要であれば設定しておく
+
+### npm-scripts
+
+必要なパッケージが揃ったので、scriptsをかいていきます。
+
+#### TypeScriptのタスク
+
+```json title="package.json"
+"scripts": {
+    "watch:ts": "tsc -w"
+  },
+```
+
+- `-w（—watch）`：ファイルの変更を監視
+
+#### Sassのタスク
+
+```json title="package.json"
+"scripts": {
+    ...,
+    "watch:sass": "sass src/sass/style.scss dist/css/style.css --style compressed --no-source-map -w"
+  },
+```
+
+日本語にしてみると…  
+`sass [参照先] [出力先] [--style 圧縮スタイル] [ソースマップ不要] [ファイル変更の監視]`
+
+#### PostCSSのタスク
+
+```json title="package.json"
+"scripts": {
+    ...,
+    "watch:postcss": "postcss -u autoprefixer -b 'last 2 versions, > 5%, Firefox ESR, not dead' dist/css/style.css -o dist/css/style.css -w"
+  },
+```
+
+日本語にしてみると…  
+`postcss -u(—use)[使用プラグイン] -b[browserslist指定] [参照先] -o(--output) [出力先] [ファイル変更の監視]`
+
+ここでbrowserslistが上手く効かずエラー吐くので、scripts直書きへ変更…
+
+<Msg type="add" date={frontmatter.updatedDate}>
+これでbrowserslistを直書きしなくてもいけた！
+
+```json title="package.json"
+"watch:postcss": "postcss dist/css/style.css -u autoprefixer -o dist/css/style.css -w"
+```
+
+最初に参照先を書かないといけなかったみたい。
+公式documentの一番最初にかいてあった😇
+
+</Msg>
+
+#### まとめて実行するタスク
+
+スクリプトをまとめて実行可能にするパッケージ、npm-run-allをインストール。
+
+```json title="command"
+npm i -D npm-run-all
+```
+
+```json title="package.json"
+"scripts": {
+    "start": "npm-run-all -p watch:*",
+    ...
+  },
+```
+
+日本語にしてみると…  
+`npm-run-all -p(—parallel) [watch:が先頭につくもの]`
+
+- `-p`：並列実行（同時に実行）
+
+### 完成
+
+```json title="package.json"
+"scripts": {
+   "start": "npm-run-all -p watch:*",
+   "watch:ts": "tsc -w",
+   "watch:sass": "sass src/sass/style.scss dist/css/style.css --style compressed --no-source-map -w",
+   "watch:postcss": "postcss -u autoprefixer -b 'last 2 versions, > 5%, Firefox ESR, not dead' dist/css/style.css -o dist/css/style.css -w"
+ },
+```
+
+これで無事理想とするタスクが完成です。  
+`npm run start`とコマンドを打てば、ファイル変更があるたびにコンパイルを実行してくれます🥳  
+ちなみにファイル変更監視を終了させたいときは`Ctrl + C`
+
+## おわり
+
+VSCodeのコンパイラー拡張機能、アンインストール🙏
+
+それでは、 ☁️ ぼんっ
+
+## 参考サイト
+
+- [npm - scripts](https://docs.npmjs.com/cli/v6/using-npm/scripts)
+- [GitHub - NPM Scripts By meetKowshik](https://gist.github.com/meetKowshik/66e27b907cf31778d4096fd0e995a2a5)
+- [Sass の教科書 - Sass コマンドの使い方を覚えよう](https://book.scss.jp/code/c2/04.html)
+- [PostCSS CLI](https://github.com/postcss/postcss-cli)
+- [ICS MEDIA - Node.js ユーザーなら押さえておきたい npm-scripts のタスク実行方法まとめ](https://ics.media/entry/12226/)

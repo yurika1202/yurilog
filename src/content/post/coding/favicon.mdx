@@ -1,0 +1,336 @@
+---
+title: faviconを考える
+publishDate: 2022/06/12
+tags: ['favicon', 'HTML']
+draft: false
+---
+
+ファビコンって名前・サイズ感・シンプルなデザインでかわいいですよね🥺  
+小さいながらも個性が出る Webサイトの大事な一部であり、Twitterなどでは通知を表示する機能がついていたりと、その存在感は大きいファビコンさん。  
+そんな重要なファビコンを私は今までなんとなくで設定しており、とりあえずいろんなサイズいれときゃいいんでしょ～～とズラァっと記述していたタイプでした。  
+そんなぞんざいに扱っていいわけがないので、改めてファビコンを理解するべくしたインプットの記録です。
+
+## ファビコン設定の基本
+
+まずは基本のファビコン設定です。
+
+```html title="index.html"
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" type="image/png" href="/apple-touch-icon.png" sizes="180x180" />
+```
+
+外部ソースと関連付けができる link要素を使い、ファビコンを設定します。
+
+### rel属性
+
+`icon`を指定することによって、リンク先がアイコンであることを示します。  
+ただし iOS では`icon`種別を使えないので、別途標準外である`apple-touch-icon`を使用する必要があります。  
+ググっていると`shortcut`を使用している場合がありますが、これは現在では非推奨となっています。  
+IE8 以下に対応する必要がある場合のみ`shortcut icon`と記述可能です。  
+`icon shortcut`の逆順での記述や他キーワードと合わせての記述は出来ないので注意が必要です。
+
+### type属性
+
+リンク先のMIMEタイプを記述します。  
+ファビコンでは`image/png`、`image/svg+xml`を使うことが多いです。  
+もし IE9/IE10にも対応が必要な場合は`image/vnd.microsoft.icon`や`image/x-icon`を使用します。  
+ちなみにMIMEタイプとは外部ファイルを組み込む際にファイルの種類を判別させるためのもの。  
+ブラウザは拡張子ではなくMIMEタイプでファイルの種類を見ているので、正しく設定していないとバグの原因となる可能性があります。
+
+[MIME タイプ (IANA メディアタイプ) - HTTP | MDN](https://developer.mozilla.org/ja/docs/Web/HTTP/Basics_of_HTTP/MIME_types)
+
+### href属性
+
+ファイル先を指定します。  
+ファビコンは必ずルートディレクトリ直下に置いておくこと。  
+理由は以下の引用の通りです。
+
+> RSSリーダーなど一部のツールはサーバーの`/favicon.ico`にしかリクエストを送信せず、それ以外の場所をわざわざ探そうとしません。
+>
+> <cite>
+>   [2021年のファビコンを極める:本当に必要なファイルはほぼ6つ（翻訳）｜TechRacho by
+>   BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2021_06_24/108697)
+> </cite>
+
+なにかにつけてまとめておきたいタイプの私はムズムズしてきちゃいます…がまん… 😇
+
+### sizes属性
+
+rel属性が`icon`または`apple-touch-icon`の場合のみ指定できます。  
+`any`を指定した場合は、type 属性がどのようなサイズにも調整可能な`image/svg+xml`である必要があります。  
+解説によっては複数のサイズのアイコンを用意し設定している場合がありますが、1つ用意しておけば充分です。  
+複数読み込んでいても適切なサイズを読み取ってくれるのはSafariのみで、多くの環境下では最初または最後のもののみが適応されるためです。  
+以下は[2021年のファビコンを極める:本当に必要なファイルはほぼ6つ（翻訳）｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2021_06_24/108697)で定義されていた、ファビコンのベストサイズをまとめたものになります。
+
+<table class="table_col">
+  <tbody>
+    <tr>
+      <th style="min-width: 210px">favicon.ico</th>
+      <td>32x32</td>
+    </tr>
+    <tr>
+      <th style="min-width: 210px">apple-touch-icon.png</th>
+      <td>180x180(paddingと背景をつけておくべき)</td>
+    </tr>
+    <tr>
+      <th style="min-width: 210px">Android用</th>
+      <td>192x192(ホーム画面用)</td>
+    </tr>
+    <tr>
+      <th style="min-width: 210px"></th>
+      <td>512x512(ホーム画面から起動した際のロード中に表示するもの)</td>
+    </tr>
+  </tbody>
+</table>
+
+### 拡張子はどれにすべきか
+
+#### .ico
+
+すべてのブラウザで使用可能です。  
+アイコン専用の拡張子であり、複数のサイズを保持できます。
+
+#### .png
+
+現在すべてのブラウザで対応されています🙌  
+ただしIE10以下に対応する場合は、`.ico`を使用します。  
+じゃあ`.ico`だけでオッケーなんじゃない？と思いきや、Safariでホーム画面にお気に入りした場合は`apple-touch-icon.png`しか読み込まないという壁があるので、`.png`のファイルは必要です。  
+なんなら2022年6月でIEが終焉を迎えるので、それ以降は`.png`のみでよさそうですね🥺  
+[PNG favicons | Can I use... Support tables for HTML5, CSS3, etc](https://caniuse.com/link-icon-png)
+
+#### .svg
+
+サイズやカラー変更を手軽にできてダークモード対応に優れているなど、いろいろとメリットのある`.svg`ですが、IEとSafariは未対応なのでまだファビコン拡張子のレギュラー争いには遅れをとっています。  
+IEは置いておいて、Safari未対応が痛い…  
+[SVG favicons | Can I use... Support tables for HTML5, CSS3, etc](https://caniuse.com/link-icon-svg)
+
+#### .gif
+
+動きのあるファビコンにする時などに使います。  
+ただし対応ブラウザはFirefoxのみとなっており、その他のブラウザでは表示はされますがアニメーションはないので注意が必要です。  
+ちなみに`.png`の画像をJavaScriptのイベントでアニメーションさせるこちらの記事、発想の天才…ってなりました😇  
+ふわ～とハートがでてくるのかわいい…  
+[faviconをアニメーションさせてみる | ジャーナル | トライベック](https://www.tribeck.jp/column/opinion/production/20200525/)
+
+### ファビコンのキャッシュ防止
+
+ファビコンの更新時にはファイル名に`?v=2`を追加することで、ブラウザに新しいバージョンをダウンロードさせることができます。
+
+```html title="index.html"
+<link rel="icon" href="/favicon.ic?v=2" />
+```
+
+## SVGファイルをいじる
+
+SVGファイルを開くと見慣れないタグや数字がズラァと並んでいて、そっと閉じてしまいませんか😇  
+けどずっとは逃げれないので、ファビコンをきっかけにSVGの基本を少し勉強してみました。
+
+- [HTML SVG の基本的な使い方（SVG 入門）](https://www.webdesignleaves.com/pr/html/svg_basic.html)
+- [SVG を使うときに知っておくといいことをまとめました - Qiita](https://qiita.com/manabuyasuda/items/01a76204f97cd73ffc4e)
+
+案外いけそう…！  
+食わず嫌いよくないってことで、今回のファビコンの設定に戻ります。
+
+### ダークモード対応
+
+ダークトーンのファビコンだと、ダークモード設定を適用している環境下では見えづらい問題があるので、SVGファイルにCSSを記述して対応していきます。
+
+```html title="index.html"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <style>
+    path {
+      fill: #000;
+    }
+    @media (prefers-color-scheme: dark) {
+      path {
+        fill:#fff;
+      }
+    }
+    </style>
+  <path d="..."/>
+</svg>
+```
+
+- svgタグ
+  - `xmlns`  
+    名前空間を指定します。
+  - `viewBox`  
+    図形の描画座標を指定します。
+    `viewBox="min-x, min-y, width, height"`となっており、単位は不要です。
+- `@media (prefers-color-scheme: dark)`  
+  ダークモード時という意味のメディアクエリで、この中にダークモード時に適用させるカラーを記述します。
+  - `fill`  
+    要素の塗りつぶすことができます。
+  - `stroke`  
+    今回は使用していませんが、このプロパティを使うと線の色を変更できます。
+- pathタグ  
+  複雑な図形を描画する際に使用します。
+
+### SVGファイルの最適化
+
+ついでにSVGファイルの最適化もしておきます。  
+Gulpなどで自動化する方法もあるようですが、今回は[SVGOMG](https://jakearchibald.github.io/svgomg/)というツールを使用しました。
+
+## manifest.jsonを作成する
+
+*manifest.json*はMDNでは以下のように解説されています。
+
+> ウェブアプリマニフェストは、プログレッシブウェブアプリ(PWA) と呼ばれる一連のウェブ技術の一部であり、アプリストアを通さずに端末のホーム画面にインストールすることができるものです。
+>
+> <cite>[ウェブアプリマニフェスト | MDN](https://developer.mozilla.org/ja/docs/Web/Manifest)</cite>
+
+つまり「ホーム画面に追加」をする際の設定を定義できるファイル、ということになります。
+
+### 今回の設定内容
+
+[こちらのサイト](https://www.webzinne.com/topics/qtaymy/)の「ブログ / ホームページ向けのマニフェスト」を参考にさせていただき、*manifest.json*を作成しました。
+
+```html title="index.html"
+<link rel="manifest" href="/manifest.json" />
+```
+
+```json title="manifest.json"
+{
+  "name": "hoge WebApp",
+  "short_name": "hoge",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "background_color": "#fff",
+  "theme_color": "#000",
+  "description": "hogeのwebサイトです。"
+}
+```
+
+- `name/short_name`  
+  ホーム画面に追加する際に表示される名前です。  
+  `short_name`はホーム画面に追加後、`name`が長く表示スペースがない場合に表示されるものです。
+
+- `icons`  
+  ホーム画面に表示させるアイコンを設定します。  
+  192pxがホーム画面用、512pxはスプラッシュ画面（ホーム画面から起動した際のロード中に表示される画面）で使用されます。
+
+- `start_url`  
+  アイコンをタップして起動させた際に表示される URL を記述します。  
+  今回は相対パス`"."`を指定し、`manifest.json`と同階層にある`index.html`を表示させました。
+
+- `background_color`  
+  起動させてからCSSが読み込まれるまでに表示される背景色を指定します。  
+  Webサイトの`background-color`と一致させることが推奨されています。
+
+- `theme_color`  
+  ツールバーの色を設定します。
+
+- `description`  
+  サイトの説明文を設定します。
+
+- `scope`  
+  今回は設定していませんが、`sope`キーはナビゲーションを制限してスコープを定義するものです。  
+  もしもスコープ外へ移動した際には通常のWebページに戻ります。  
+  デフォルトスコープ値は`manifest.json`のあるディレクトリなので、今回のように`scope`を指定しない場合は`manifest.json`があるディレクトリがスコープになっています。  
+  つまり自サイト以外へ移動した場合に、スコープから外れるということになります。
+
+- `display`  
+  こちらも今回は設定していませんが、どのように表示させるかを指定するものです。
+  - fullscreen  
+    ブラウザ UI を隠し、画面いっぱいに表示させる
+  - standalone  
+    スタンドアロンアプリのように表示させる
+  - minimal-ui  
+    standaloneにナビゲーションを制御するための最低限のUIを表示させる
+  - browser  
+    ブラウザと同様に表示させる
+
+[web.dev - Add a web app manifest](https://web.dev/add-manifest/#display)に掲載されているの displayイメージが分かりやすかったので、もしもイメージが湧かない方は参考に見てみてください。
+
+## 結論と課題
+
+以上を踏まえて、ファビコン設定は以下のようになりました。  
+2022年6月以降は
+
+```markup title="Directory Tree"
+	├─ index.html
+	├─ favicon.ico
+	├─ apple-touch-icon.png
+	├─ icon-192.png
+	├─ icon-512.png
+	├─ manifest.json
+	...
+
+```
+
+```html title="index.html"
+<link rel="icon" href="/favicon.png" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" type="image/png" href="/apple-touch-icon.png" sizes="180x180" />
+<link rel="manifest" href="/manifest.json" />
+```
+
+```json title="manifest.json"
+{
+  "name": "hoge WebApp",
+  "short_name": "hoge",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "background_color": "#fff",
+  "theme_color": "#000",
+  "description": "hogeのwebサイトです。"
+}
+```
+
+なんと…！4行…！  
+とてもミニマルで感動です🥺
+
+## おわりに
+
+rel属性にshortcutを指定することに、どこも辛口でにやけました🤣
+
+> 世の中には、未だに「HTMLにfavicon.icoを含めるときは以下のようにしましょう」という化石のような知識を教えるチュートリアルが山ほどあります。
+>
+> <cite>
+>   [2021年のファビコンを極める: 本当に必要なファイルはほぼ6つ（翻訳）｜TechRacho by
+>   BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2021_06_24/108697)
+> </cite>
+
+> iconより以前はリンク種別shortcutがよく使用されていましたが、これは非準拠で無視されますのでウェブ作者は今後使用してはいけません。
+>
+> <cite>
+>   [HTML属性: rel - HTML: HyperText Markup Language |
+>   MDN](https://developer.mozilla.org/ja/docs/Web/HTML/Link_types)
+> </cite>
+
+ちなみに画像作成からコード生成までしてくれるジェネレーター（[Favicon Generator for perfect icons on all browsers](https://realfavicongenerator.net/)
+）もあったりするので、こちらを活用するのもいいかもですね👏
+
+☁️ ぼんっ
+
+### 参考サイト
+
+- [HTML Standard](https://html.spec.whatwg.org/multipage/links.html#rel-icon)
+- [【2021年版】favicon（ファビコン）の設定方法と画像の作り方](https://zenn.dev/pacchiy/articles/e4dcd7bd29d387)
+- [2021年のファビコンを極める: 本当に必要なファイルはほぼ6つ（翻訳）｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2021_06_24/108697)
+- [HTML SVGの基本的な使い方（SVG入門）](https://www.webdesignleaves.com/pr/html/svg_basic.html)
+- [Add a web app manifest](https://web.dev/add-manifest/)
+- [ウェブアプリマニフェスト | MDN](https://developer.mozilla.org/ja/docs/Web/Manifest)

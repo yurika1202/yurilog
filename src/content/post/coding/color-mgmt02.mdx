@@ -1,0 +1,330 @@
+---
+title: カラー管理を再考したので、その記録
+publishDate: 2022/07/05
+tags: ['Sass', 'カラー管理']
+draft: false
+---
+
+import Msg from '../../../components/post/Msg.astro';
+
+以前カラー管理についての[ブログ](/post/coding/color-mgmt)を投稿したのですが、改変せざるをえなかったので再考しました。
+
+## 改変後のカラー管理
+
+まずは今回の再考でこれならいけるんでは！と終着したカラー管理がこちら。
+
+```scss title="variables/_color.scss"
+@use 'sass:color';
+@use 'sass:map';
+@use '../functions/color' as *;
+
+// palettes
+// --------------------------------------------------------------------------
+$black: #303534;
+$white: #fffefd;
+$gray: #9c9c9c;
+$parisGreen: #d9e4dd;
+$smithGreen: #7f9f98;
+$beige: #cdc9c3;
+$darkGreen: #394a47;
+$orange: #e5bd78;
+$blue: #b2b9d1;
+
+// sns color
+$twitter: #1da1f2;
+$fb: #3b5998;
+$hatena: #00a4de;
+$feedly: #6cc655;
+
+// color map
+// --------------------------------------------------------------------------
+$theme-colors: (
+  bg-body: $parisGreen,
+  bg-contents: $white,
+  text: $black,
+  base: $parisGreen,
+  accent: $smithGreen,
+  white: $white,
+  gray: $gray,
+  beige: $beige,
+  orange: $orange,
+  blue: $blue,
+  shadow: $darkGreen,
+);
+
+$sns-colors: (
+  twitter: $twitter,
+  fb: $fb,
+  hatena: $hatena,
+  feedly: $feedly,
+);
+
+// color root
+// --------------------------------------------------------------------------
+:root {
+  @each $key, $color in $theme-colors {
+    --c-#{$key}: #{hexToRGB($color)};
+  }
+
+  @each $key, $color in $sns-colors {
+    --c-#{$key}: #{hexToRGB($color)};
+  }
+}
+```
+
+```scss title="functions/_color.scss"
+@use 'sass:color';
+
+// HEXコードをRGBAへ変換
+// --------------------------------------------------------------------------
+@function hexToRGB($hex) {
+  @return color.red($hex), color.green($hex), color.blue($hex);
+}
+
+@function color($color_name, $alpha: 1) {
+  @return rgba(var(#{$color_name}), $alpha);
+}
+```
+
+詳細はまたあとで記述します🙏  
+前回見送った`@each`を使ったり、だいぶ違う雰囲気になりました。
+
+## 改変前のカラー管理
+
+そしてこれが以前のカラー管理。
+
+まずパレットに使用色をストックしていきます。  
+ここの変数名は必ずカラー名で！
+
+```scss title="variables/_color.scss"
+// palettes
+// --------------------------------------------------------------------------
+$black: #333;
+$mildBlack: #2B2B2B;
+$white: #fff;
+$gray: #707070;
+$lightGray: #EDEDED;
+$silverGray: #A0A0A0;
+
+//color map
+// --------------------------------------------------------------------------
+$colors: (
+    color-body-background: $white,
+    color-block-background: $lightGray,
+    color-global-text: $mildBlack,
+    color-global-icon: $gray,
+    color-headingLv2-text: $black,
+    color-headingLv2-border: $silverGray,
+    color-info-border: $silverGray,
+    color-contact-btn: $silverGray,
+    color-contact-border: $silverGray,
+);
+```
+
+そしてパレットをもとに、モジュールとカラーを結びつけるマップを作成します。
+
+```scss title="functions/_color.scss"
+@use "sass:map";
+@use "../variables" as *;
+
+@function colors($key) {
+    @return map.get($colors, $key);
+}
+```
+
+次に作成した関数でマップ変数を呼び出し…
+
+```scss title="foundation/_base.scss"
+@use "../functions/" as *;
+@use "../variables/" as var;
+
+body {
+	background: colors(color-body-background);
+  color: colors(color-global-text);
+}
+```
+
+Sassファイルをコンパイルしたら、無事カラーコード変換されてる！  
+という流れでした。
+
+```css title="dist/style.css"
+body {
+  background: #fff;
+  color: #2b2b2b;
+}
+```
+
+## なぜ改変が必要だったのか
+
+自身のブログテーマ作成において、前回考察したカラー管理を実践しました。  
+コーディング環境を構築している時は特に不都合はありませんでした。  
+もちろんブログテーマ作成以前にも、何度かコーディング練習時に使用してみていたのですが、その時もスムーズにいけてました。
+
+### パレットが途中でぐちゃぐちゃに
+
+これは大反省なんですが、カラーマップをどこまで掘り下げるか（どのレベルの要素まで限定してマップ作成していくのか）を定めてなかったんです。  
+なので途中から「あれ、ここって限定してマップ作る必要ある…？」「あれ、hoverのときも別でマップ作るの…？」「え？もはやマップいるの…？」と大混乱🙄🌀
+
+完全なる準備不足です。  
+コーディング練習時にはスムーズにいってたはずなのに…  
+そのとき壁にぶち当たらなかった理由は、
+
+- デザインカンプをデザイナーさんが作成してるから、カラー指定もすっきりしてた
+- 1ページ程度のものだったから
+
+だったからかなあと思います。  
+やはり実践に勝るものなしですね…😢
+
+### ダークモードをやっぱり実装したくなった
+
+これが改変を決めた一番大きい理由です。
+
+はじめはダークモード実装は見送る予定でした。  
+しかしライトトーンを使用していたので、ダークモードで雰囲気変えるの面白そうだな〜と思い。  
+でも以前のカラー管理はダークテーマをあまり視野にいれてなかったので、これでやってくのは無理があるかも…と気付きました。
+
+てことで、`@each`も活用してやり直してみよう〜〜！
+
+## 改変にとりかかる！
+
+今回参考にさせていただいたのは以下のサイトです。  
+というかもうほぼこれです。ありがとうございます🙇‍♀️  
+[ダークモードにも柔軟に対応できるCSS&Sass変数のカラー設定方法](https://higemura.com/blog/programming/dark-mode-css-variables-01#anchor3716)
+
+### カラーマップの作成
+
+```scss title="variables/_color.scss"
+@use 'sass:color';
+@use '../functions/color' as *;
+
+// palettes
+// --------------------------------------------------------------------------
+$black: #303534;
+$white: #fffefd;
+$gray: #9c9c9c;
+$parisGreen: #d9e4dd;
+$smithGreen: #7f9f98;
+$beige: #cdc9c3;
+$darkGreen: #394a47;
+$orange: #e5bd78;
+$blue: #b2b9d1;
+
+// sns color
+$twitter: #1da1f2;
+$fb: #3b5998;
+$hatena: #00a4de;
+$feedly: #6cc655;
+
+// color map
+// --------------------------------------------------------------------------
+$theme-colors: (
+  bg-body: $parisGreen,
+  bg-contents: $white,
+  text: $black,
+  base: $parisGreen,
+  accent: $smithGreen,
+  white: $white,
+  gray: $gray,
+  beige: $beige,
+  orange: $orange,
+  blue: $blue,
+  shadow: $darkGreen,
+);
+
+$sns-colors: (
+  twitter: $twitter,
+  fb: $fb,
+  hatena: $hatena,
+  feedly: $feedly,
+);
+
+// color root
+// --------------------------------------------------------------------------
+:root {
+  @each $key, $color in $theme-colors {
+    --c-#{$key}: #{hexToRGB($color)};
+  }
+
+  @each $key, $color in $sns-colors {
+    --c-#{$key}: #{hexToRGB($color)};
+  }
+}
+```
+
+#### パレット
+
+ひとまずカラーパレットを作成するところは、前回と一緒。  
+ひと手間だけど、このほうがどんな色か分かりやすくて個人的に好きだから🤟  
+[変更に強いSassの色管理プラクティス - Qiita](https://qiita.com/1natsu172/items/ef6b0fcba6bbe380df1e)
+
+#### マップ
+
+前回はざっくり`color-モジュール-パーツ`みたいな感じで変数名をつけていたんですが、今回はもっとざっくり！  
+ダークテーマ時に変更したいところを作成しつつ、もうほぼ色名。  
+でもこっちのほうがぱっと見でいいかな👻  
+この変数名や種類については、また随時使いやすいように変更していきます。  
+そのためにもやっぱりパレットあったほうがよき！
+
+あとは毎回同じであろうSNSカラーを別マップでまとめてみたり、まだ実装してないので作成してませんがダークモード用のマップも追加する予定です。
+
+#### CSS変数
+
+それぞれのマップから変数名とカラーコードを引っ張ってきて、CSS変数の`:root`を作成していきます。  
+ただカラーコードは柔軟性を持たせるため、RGBAで指定していきたいので `HEX(#ffffff)`を `RGBA(255, 255, 255, 1)`に変換する関数を通していきます。
+
+<Msg type="info">
+  Sassの`rgba()`関数内ではCSSのvar関数を認識できないため、変換作業が必要になります。
+</Msg>
+
+### 関数の作成
+
+```scss title="functions/_color.scss"
+// HEXコードをRGBAへ変換
+// --------------------------------------------------------------------------
+@function hexToRGB($hex) {
+  @return color.red($hex), color.green($hex), color.blue($hex);
+}
+
+@function color($color_name, $alpha: 1) {
+  @return rgba(var(#{$color_name}), $alpha);
+}
+```
+
+#### hexToRGB関数
+
+さっきのCSS変数でHEXをRGB値に変換させる関数です。  
+`color.red($hex)`はSassのビルトインモジュールで、カラーコードからred数値を出してくれます。便利～～  
+[sass:color](https://sass-lang.com/documentation/modules/color)
+
+例えば`#ffffff`を引数に渡した場合は、`255,255,255`が返ってきます。  
+そしてそれがCSS変数に格納されて、`—c-white: 255, 255, 255;`となるわけです🥳
+
+#### color関数
+
+これは実際にカラー指定をするときに使用する関数です。
+
+```css title="foundation/_base.scss"
+body {
+  background: color(--c-bg-body);
+  color: color(--c-text);
+}
+```
+
+上記で作成した RGB値が入ったCSS変数を引数に渡すことで、コンパイル後にはRGBAでカラー指定がされています。  
+引数に`$alpha`値を指定すれば、透明度も指定できます🙌
+
+```css title="dist/style.css"
+body {
+  background: rgba(217, 228, 221, 1);
+  color: rgba(48, 53, 52, 1);
+}
+```
+
+## おわり
+
+ということで、ひとまずこれで終着しました！  
+このブログのカラー管理も新しく考察したものを使ってみていますが、うん！快適！！！  
+まだダークモードを実装できていないので、なるはやで挑戦してみようと思います～  
+そしてまたいろいろと修正をかけていこうと思います。
+
+それでは、どろんっ☁️

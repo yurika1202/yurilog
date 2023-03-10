@@ -1,0 +1,132 @@
+---
+title: querySelectorで取得したDOM要素に型を定義する
+publishDate: 2022/08/22
+tags: ['TypeScript']
+draft: false
+---
+
+[サバイバルTypeScript](https://typescriptbook.jp/)を一通り目を通してさっそく実践へ移っているんですが、1歩目から躓いて絶望が見えています🤤ひん🤤  
+まだまだ型推論に頼りきりな感じですが、少しづつTypeScriptと友達になれるよう勉強していきます…
+
+今回はDOM取得で躓いたときの記録です。  
+私は`querySelector*`を使いがち派なので、そこの型定義に焦点を当てます。
+
+## まずはDOM取得をしてみる
+
+```ts title="sample.ts"
+// dialog: Element | null
+const dialog = document.body.querySelector('.js_dialog');
+// error:オブジェクトは 'null' である可能性があります。
+dialog.showModal();
+```
+
+特になにも明記せずとも上記のようにTypeScriptが型推論してくれます。  
+ただこれだとアバウトすぎるし、エラーも起きているので以下をクリアできるように型定義を行います。
+
+- `dialog`を親クラスではなく、詳細なElement型で取得する
+- `null`でない場合に実行するという条件が必要
+
+## 型定義をしてみる
+
+```ts title="sample.ts"
+// dialog: HTMLDialogElement | null
+const dialog = document.body.querySelector('.js_dialog') as HTMLDialogElement | null;
+
+// if文でnullではない時で条件分岐
+if(dialog != null) {
+  dialog.showModal();
+}
+// or オプショナルチェーンを使用
+dialog?.showModal();
+// or 非Nullアサーション演算子を使用
+dialog!.showModal();
+```
+
+### 適切な型を定義する
+
+まずは取得した要素に型アサーション（`as`）を使用して、適切な型を定義します。  
+条件分岐をするという手間がかかるからnull型をつけるのやめるか〜と考えましたが、それは要素が存在しなかった場合の可能性をなくしていることに繋がるのでよろしくありません🙅‍♀️
+
+### nullかどうかの条件判定
+
+if文を使って要素が`null`でない場合に処理を実行させます。  
+オプショナルチェーン（`.?`）や非Nullアサーション演算子（`!`）を使用すると記述を簡略化できてよさそうですが、これらは要素が存在していることが前提になっています。  
+つまり`null`である可能性を強制的になくしているので、型アサーションでわざわざunion型にした意味がなくなってしまいます。  
+なのでまずはif文を使用すること前提で、確実にその要素が存在することが確証できている場合のみに使用を検討します☝️
+
+### 型アサーションの別パターン
+
+型アサーションは`<>`で記述する方法もあります。が、一般的には`as`が使用されていることが多いようです。  
+その理由は、ts構文と明確に区別するためとかなんとか。  
+`<>`で記述するならこういう感じになります。
+
+```ts title="sample.ts"
+// dialog: HTMLDialogElement | null
+const dialog = document.body.querySelector<HTMLDialogElement>'.js_dialog';
+```
+
+以下のようにDOM取得実行前に型アサーションを置いてしまうと、`null`とのunion型にならないためよろしくありません。
+
+```ts title="sample.ts"
+// dialog: HTMLDialogElement
+const dialog = <HTMLDialogElement>document.body.querySelector('.js_dialog');
+```
+
+### querySelectorAll の場合
+
+```ts title="sample.ts"
+// btn: NodeListOf<HTMLButtonElement>
+const btn = document.body.querySelectorAll('.js_dialog_btn') as NodeListOf<HTMLButtonElement>;
+
+if (btn.length !== 0) {
+	...
+}
+```
+
+`querySelectorAll`の場合はNodeListが返ってくるので、要素が存在しない場合は`null`ではなく`NodeList[]`という空の配列が返されます。  
+なので`.length`を使って条件分岐を行います。
+
+### Typed querySelector
+
+ひとつずつ型アサーションを記述していくのはなかなかの手間なので、[Typed querySelector](https://github.com/g-plane/typed-query-selector)を使用するのが便利です🥳  
+インストール後にファイル内で`import 'typed-query-selector'`と記述するだけで使用が可能。  
+*.tsconfig*ファイル内で以下のように記述する方法もありますが、ドキュメントを見ると非推奨らしく、ESモジュールを使用しない場合にのみこう書いてねとのこと。
+
+```ts title=".tsconfig"
+{
+  "compilerOptions": {
+    "types": ["typed-query-selector"]
+  }
+}
+```
+
+#### strictモード
+
+`import 'typed-query-selector/strict'`とすると strictモードになり、セレクタに対して構文チェックを行ってくれます。  
+もしエラーなら`never`を返します。（strict モードでない時は`Element`が返される。）  
+`never`は値を持たない型なのでエラーセレクタに対しての操作が一切できなくなりミスに気づきやすくなることが利点😌
+
+```ts title="sample.ts"
+// dialog: HTMLDialogElement | null
+const dialog = document.body.querySelector('dialog.js_dialog');
+// btn: : NodeListOf<HTMLButtonElement>
+const btn = document.body.querySelectorAll('button.js_dialog_btn');
+```
+
+シンプルで分かりやすい！
+もちろんIDや属性、疑似クラスでセレクタ指定しても正しい型を抽出してくれます。
+
+## おわり
+
+これにて無事`querySelector*`でのDOM取得時に型定義ができました🥳  
+型定義には関係ないのですが、冒頭で述べたように私は便利だし～と脳死で`querySelector*`を使ってきてました。  
+しかし`getElement*`の方が取得速度が速かったりメリットが潜んでいると最近知ったので、改めて両者の特性を理解し直したいなと思います。
+
+それでは、☁️ぼんっ
+
+## 参考サイト
+
+- [How to use the querySelector() method in TypeScript](https://bobbyhadz.com/blog/typescript-queryselector)
+- [MDN - オプショナルチェーン](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Optional_chaining)
+- [TypeScript Deep Dive 日本語版 - strictNullCheckes](https://typescript-jp.gitbook.io/deep-dive/intro/strictnullchecks)
+- [github - Typed querySelector](https://github.com/g-plane/typed-query-selector)

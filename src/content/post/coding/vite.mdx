@@ -1,0 +1,250 @@
+---
+title: 巷で人気のViteを触ってみた
+publishDate: 2022/06/25
+tags: ['Vite', '環境構築']
+draft: false
+---
+
+import Msg from '../../../components/post/Msg.astro';
+
+ビルドツールで定番のWebpackすら未体験なわたしなんですが、簡単！速い！便利！の3拍子が揃っているViteで環境構築をしてみました。  
+必要なファイルだけコンパイルしてくれるから速いとかなんとか👏  
+Viteの詳しい概要説明はぜひとも[公式](https://ja.vitejs.dev/)で〜〜！（日本語あるのうれしい）（ロゴかわいい）
+
+## さっそくはじめる
+
+今回の環境構築で公式以外に参考にしたのは、我らがICS.media さんです。
+
+[Viteで始めるモダンで高速な開発環境構築 - ICS MEDIA](https://ics.media/entry/210708/)
+
+ReactやTypeScriptはまだまだ勉強中なので、ひとまずモダンなJavaScriptの環境をつくっていきたいと思います。  
+レッツcreate〜〜🙌
+
+```title="command"
+$ npm create vite@latest
+```
+
+全部vanillaを選択して終わり。秒。
+これでコマンド叩くだけで、ローカルサーバーも立ち上げれるしビルドもできる。すごい。
+
+## 設定を変える
+
+ただデフォルトだといろいろ不都合があるので、`vite.config.js`を作成して少し触っていきます。
+
+```js title="vite.config.js"
+module.exports = {
+    base: './',
+    root: './src',
+    build: {
+      outDir: '../dist'
+    }
+}
+```
+
+- `base`  
+  相対パスを指定する。デプロイ先がルートでない場合にも対応するため、今回は`./`を指定。
+
+- `root`  
+  *index.html*の場所を指定。今回はルート直下に作成したsrcフォルダの中に _index.html_ をおいたので、`./src`を指定。
+
+- `build`  
+  outDir：ファイルを吐き出す場所の指定。_index.html_ が基準。今回は`../dist`を指定。
+
+<Msg type="warn">
+  <p>読み込みファイルのパス変更も忘れずに！</p>
+</Msg>
+
+## Sass
+
+必須な[Sass](https://github.com/sass/dart-sass)も入れていきます💁‍♀️
+
+```title="command"
+$ npm i sass
+```
+
+これでビルドすると、`dist/asetts/`に CSSファイルが作成されます。  
+また自動で htmlファイルから CSSファイルを読み込む`link`タグを記述してくれます。
+
+## AutoPrefixer
+
+VSCodeのプラグインでやってたベンダープレフィックス自動記述を、ビルド時にできるようにしてみます💁‍♀️  
+[https://github.com/browserslist/browserslist](https://github.com/browserslist/browserslist)
+
+```title="command"
+$ npm i autoprefixer
+```
+
+付与条件はひとまずこんな感じに。
+
+```json title="package.json"
+"browserslist": [
+  "last 2 versions",
+  "android >= 10",
+  "iOS >= 13",
+  "not dead"
+]
+```
+
+- 各ブラウザの最新の2バージョンまで
+- Android4以降
+- iOS10以降
+- 24ヶ月以内にアップデートされてないバージョンのブラウザは除く  
+  [.browserslistrc で対象ブラウザを指定する - Qiita](https://qiita.com/takeshisakuma/items/0bc1c39ee976bd1f52d7)
+
+そしてViteの設定ファイルにautoprefixer使ってよ〜と記述しておきます。
+
+```js title="vite.config.js"
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  css: {
+    postcss: {
+      plugins: [require('autoprefixer')],
+    },
+  },
+});
+```
+
+これでビルド時にベンダープレフィックスをつけてくれますありがとう〜〜
+
+## PrettierとESLint
+
+AutoPrefixerいれたなら、コード整形もしとくかってことでPrettierとESLintも導入していきます💁‍♀️  
+こちらの[Zenn記事](https://zenn.dev/hiroko_ino/articles/eslint-prettier-husky-2022)が懇切丁寧に教えてくれます。
+
+できたで〜〜と思ったら、なにやらESLintが怒っている😡
+
+![ESLint導入時のエラーログ。.prettierrcに原因があるらしい。](/images/post/vite/1677048254290.png)
+
+`.prettierrc`ファイルになにやら変な文字あるで、とエラー吐かれました🤢  
+Prettierが自動で作ってくれたこのファイル、どうやら手動で作成しないと上手くいかないみたい。なんで～～  
+とりあえず手動で作成し直して解決。
+
+そしてついでにPrettierのプラグイン、[CSS Order Prettier Plugin](https://github.com/Siilwyn/prettier-plugin-css-order)でソートもしてみる。  
+今回はsmacssにしてみました。
+
+以下がとりあえずのPrettier設定。
+
+```json title=".prettierrc"
+{
+  "order": "smacss",
+  "keepOverrides": false,
+  "printWidth": 100,
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": true,
+  "endOfLine": "lf"
+}
+```
+
+ただPrettierが余計なお世話までしてくれるんで、追々変更していきます😨  
+沼りそうな予感しかしない。
+
+## 画像ファイルの扱い
+
+静的アセットの吐き出しを以下のようにしたかったので、ちょっと試行錯誤🤔
+
+```title="directory tree"
+├─dist
+│  ├─assets
+│  │   └─img
+│  │     └─img.webp
+│  └─favicon.svg
+...
+```
+
+Vite公式によると、publicフォルダがよきみたい。
+
+> このディレクトリに配置されたアセットは開発環境ではルートパス`/`で提供され、そのままdis ディレクトリのルートにコピーされます。
+>
+> <cite>[静的アセットの取り扱い | Vite](https://ja.vitejs.dev/guide/assets.html)</cite>
+
+なので、`src`内を以下のようなディレクトリ階層にしてみると無事理想系へ辿り着けました👏
+
+```title="directory tree"
+└─src
+    ├─public
+    │  ├─assets
+    │  │   └─img
+    │  └─favicon.svg
+    └─index.html
+```
+
+## .webpに変換（or 圧縮）
+
+これは未解決です😭😭  
+ひとまずトライの記録…
+
+### libSquoosh
+
+- [squoosh/libsquoosh at dev · GoogleChromeLabs/squoosh](https://github.com/GoogleChromeLabs/squoosh/tree/dev/libsquoosh)
+
+圧縮とWebPへの変換をしてくれる（もちろん他フォーマットも可能）とのことで、[ics.mediaさんの記事](https://ics.media/entry/220204/)を参考にしつつ導入をしてみる。  
+でもうまくいかなかった…  
+Sassと競合してる？？んなわけないか😭
+
+### Vite-plugin-imagemin
+
+- [https://github.com/vbenjs/vite-plugin-imagemin](https://github.com/vbenjs/vite-plugin-imagemin)
+
+脆弱性やらが指摘されて、いろいろ警告が…  
+解決法をさぐって直してみたりしたんですが、上手く解消できなかったので中止😭
+
+### imagemin / imagemin-webp
+
+- [https://github.com/imagemin/imagemin](https://github.com/imagemin/imagemin)
+- [https://github.com/imagemin/imagemin-webp](https://github.com/imagemin/imagemin-webp)
+
+*imagemin-webp*の依存関係にある*semver-regex*っていうファイルに正規表現の脆弱性が～～って出てきて、対応しきれなかったので中止😭
+
+### sharp
+
+- [https://github.com/lovell/sharp](https://github.com/lovell/sharp)
+
+[こちらのZenn記事](https://zenn.dev/spicato_inc/articles/6afdf43d0f0a97)を参考しつつ導入したんですが、うまくいかず…
+
+ここらでもう心が折れて、「数枚の画像変換くらい手動でしてやるわい！！！」と開き直ってしまったので今回は諦め🤦‍♀️  
+また挑戦します…ひん…
+
+## npmからの警告
+
+今回npmをはじめてさわったど素人なんですが、こんなエラーにぶち当たりました。
+
+```title="Error!"
+$ npm WARN config global `--global`, `--local` are deprecated. Use `--location=global` instead.
+```
+
+ざっくり翻訳だと、設定を`--location=global`にしなさいよ〜ってこと。
+
+[Stack Overflow](https://stackoverflow.com/questions/72401421/npm-warn-config-global-global-local-are-deprecated-use-location-glo)で同じエラーに直面してる方いた。  
+こちらの回答を参考に、*npm.cmd*と*npm*ファイルの`prefix`を`-g`から`--location=global`に変更してみる。
+
+**警告でる**😇
+
+npmをアップグレードしたらいけたわ！っていうコメントもあったので、アップグレードして`Ver.8.12.1`にしてみる。
+
+**警告でる**😇
+
+なんでや～～とさらにググると、npmのGitHubの[Issue](https://github.com/npm/cli/issues/4980)にたどり着く。  
+私が試行錯誤してる日の前日にクローズしてるから、タイムリーな話題だったのね🙃  
+ここでも*npm.cmd*と*npm*ファイルいじってみて～とあるけど、それじゃ無理なんや！！！  
+でもYoussefMAbohatyさんがWindowsのアップグレード法はこうやで！と教えてくれていたので、[こちらのQiita記事](https://qiita.com/seya/items/88ad75e46323fc4a341c)を参考に再度npmをアップグレード。
+
+警告きえた～～～～ 🥳  
+ありがとう、YoussefMAbohatyさん… 日本の片隅から大きな感謝を叫ばせて…
+
+## おわり
+
+ということで、これにてわたしの初Viteはおわりです😎  
+なんだかいろいろ感動でした〜〜  
+Webpack触ったことないからViteがどれだけ早いかとかは分からないけど、ひよっこな私でも全然できたのでお手軽は実感しました！  
+ReactとTypeScriptも勉強中なので、次はその環境も整えていこうと思います。
+
+それでは、 ☁️ぼんっ
+
+## 参考サイト
+
+- [ICS MEDIA - jQueryからTypeScript・Reactまで！Viteで始めるモダンで高速な開発環境構築](https://ics.media/entry/210708/)
+- [ブログの設置 - Webエンジニア（コーダー）向けVite環境の紹介【初心者向け解説】](https://flex-box.net/vite-for-coder)
+- [Zenn - ESLintとPrettierの設定をドキュメントを丹念に見ながらやる（2022年2月時点）](https://zenn.dev/hiroko_ino/articles/eslint-prettier-husky-2022)

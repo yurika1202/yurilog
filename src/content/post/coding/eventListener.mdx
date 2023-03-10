@@ -1,0 +1,258 @@
+---
+title: addEventListenerとinnerHTMLの関係
+publishDate: 2022/07/18
+tags: ['JavaScript']
+draft: false
+---
+
+JS基礎固めにヒィヒィいってます、ゆりかです🦉  
+最近ハマった`addEventListener`が1回しか適用されない問題😔  
+単純なことだったんですが、備忘録として記録しておきます。
+
+## 目標実装
+
+- 「ジャンル」の選択に合わせて、「タイトル」の選択肢を変更する＝ふたつのセレクトボックスを連動させる
+
+よくみるやつですね。  
+今回はセレクトボックスに`addEventListener`を仕掛けて、条件合致したら`innerHTML`プロパティでHTMLの置き換えをしていきたいと思います。
+
+## ハマりポイント
+
+「ジャンル」選択変更すると1度目は「タイトル」の選択肢が上手く変更されるものの、2度目からはうんともすんとも言わない。  
+HTMLの変更もなされていない。なぜ。
+
+## 解決ポイント
+
+結論、`innerHTML`…！この人が原因でした…！！！  
+`innerHTML`は要素のHTMLの内容を変更してくれるプロパティですが、登録しているイベントは変更時に削除されちゃうようです。  
+MDNにもしっかりと記載してありました。
+
+> `innerHTML`を使用してHTML要素を追加すると（略）、以前設定したイベントリスナーを取り除くことになります。 つまり、この方法でHTML要素を追加すると、以前設定したイベントリスナーで待ち受けすることができなくなります。
+>
+> <cite>
+>   [MDN Web Docs -
+>   Element.innerHTML](https://developer.mozilla.org/ja/docs/Web/API/Element/innerHTML)
+> </cite>
+
+じゃあどうしよう？🙄
+
+今回は`innerHTML`で書き換える要素の粒度を小さくして、`addEventListener`に影響を与えないようにしてみました。
+
+## 実装してみる
+
+まずは*index.html*を用意。
+
+```html title="index.html"
+<div id="app"></div>
+```
+
+JSでデータを作成。  
+（本来はJSONでズラッと作成しているのですが、ブログにおいては本題ではないので簡単に配列で…！）
+
+```js title="main.js"
+const genreArry = ['HTML', 'JavaScript'];
+const htmlTitleArry = ['入門書', 'アクセシビリティ'];
+const jsTitleArry = ['入門書', 'React', 'VanillaJS'];
+```
+
+それぞれデータを使って`option`タグを作成し、これも配列として保持しておきます。  
+（ここ、もっときれいにリファクタリングできそう。再考ポイント🙄）
+
+```js title="main.js"
+const genreArry = ['HTML', 'JavaScript'];
+const genreOptions = [];
+for (let i = 0; i < genreArry.length; i++) {
+  genreOptions.push(`<option value="${genreArry[i]}" name="genre">${genreArry[i]}</option>`);
+}
+
+const htmlTitleArry = ['入門書', 'アクセシビリティ'];
+const htmlTitleOptions = [];
+for (let i = 0; i < htmlTitleArry.length; i++) {
+  htmlTitleOptions.push(
+    `<option value="${htmlTitleArry[i]}" name="title">${htmlTitleArry[i]}</option>`
+  );
+}
+
+const jsTitleArry = ['入門書', 'React', 'VanillaJS'];
+const jsTitleOptions = [];
+for (let i = 0; i < jsTitleArry.length; i++) {
+  jsTitleOptions.push(`<option value="${jsTitleArry[i]}" name="title">${jsTitleArry[i]}</option>`);
+}
+```
+
+ジャンルとタイトルのセレクトボックス、おまけの検索ボタンを、新たに作成した`<div>`タグの中へ入れて`#app`の子要素として挿入します。  
+ひとまず画面表示時には`htmlTitleOptions`を表示させています。
+
+```js title="main.js"
+const rootElm = document.getElementById('app');
+const genreSelectorHtml = `<select class="selector genreSelector">${genreOptions.join('')}</select>`;
+let titleSelectorHtml = `<select class="selector titleSelector">${htmlTitleOptions.join('')}</select>`;
+const searchBtnHtml = `<button class="searchBtn">検索</button>`;
+const parentElm = document.createElement('div');
+parentElm.innerHTML = genreSelectorHtml + titleSelectorHtml + searchBtnHtml;
+rootElm.appendChild(parentElm);
+```
+
+ジャンルが変更された時にイベントを仕掛け、セレクトボックスの`value`属性値に合わせて`innerHTML`を変更していきます。  
+最初に書いてみたコードは以下のような感じ。
+
+セレクトボックスをループ処理にかけてイベントを付与し、`titleSelectorHtml`を上書きして親要素の中身を書き換えています。
+
+```js title="main.js"
+const selectorElm = parentElm.querySelectorAll('.selector');
+for (const select of selectorElm) {
+  select.addEventListener('change', () => {
+    if (select.classList.contains('genreSelector')) {
+      if (select.value === 'HTML') {
+        titleSelectorHtml = `<select class="selector titleSelector">${htmlTitleOptions.join('')}</select>`;
+        parentElm.innerHTML = genreSelectorHtml + titleSelectorHtml + searchBtnHtml;
+      } else if (select.value === 'JavaScript') {
+        titleSelectorHtml = `<select class="selector titleSelector">${jsTitleOptions.join('')}</select>`;
+        parentElm.innerHTML = genreSelectorHtml + titleSelectorHtml + searchBtnHtml;
+      }
+    }
+  });
+}
+```
+
+が！タイトルのセレクトボックスが連動してくれません。  
+イベントを付与しているジャンルのセレクトボックスも書き換えられてしまっているので、イベントが削除されてしまっています😇  
+しかもちょっとくどいコードなので手直しをば…
+
+セレクトボックスをまとめて取得するのではなく、ジャンルとタイトルそれぞれを変数に格納しループ処理をやめました。  
+そして`innerHTML`で書き換える要素をタイトルのセレクトボックスに限定しました。
+
+```js title="main.js"
+const genreElm = parentElm.querySelector('.genreSelector');
+const titleElm = parentElm.querySelector('.titleSelector');
+genreElm.addEventListener('change', () => {
+  if (genreElm.value === 'HTML') {
+    titleElm.innerHTML = htmlTitleOptions.join('');
+  } else if (genreElm.value === 'JavaScript') {
+    titleElm.innerHTML = jsTitleOptions.join('');
+  }
+});
+```
+
+これでセレクトボックスのイベントを削除することなく、連動されるように実装できました🎉
+
+<p
+  class="codepen"
+  data-height="300"
+  data-default-tab="html,result"
+  data-slug-hash="dymYEeO"
+  data-user="yurika1202"
+  style="height: 300px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;"
+>
+  <span>
+    See the Pen <a href="https://codepen.io/yurika1202/pen/dymYEeO">JavaScript - SelectBox</a> by
+    Yurika (<a href="https://codepen.io/yurika1202">@yurika1202</a>) on{' '}
+    <a href="https://codepen.io">CodePen</a>.
+  </span>
+</p>
+<script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
+
+コードのまとめはこちら👇
+
+```js title="main.js"
+const genreArry = ['HTML', 'JavaScript'];
+const genreOptions = [];
+for (let i = 0; i < genreArry.length; i++) {
+  genreOptions.push(`<option value="${genreArry[i]}" name="genre">${genreArry[i]}</option>`);
+}
+
+const htmlTitleArry = ['入門書', 'アクセシビリティ'];
+const htmlTitleOptions = [];
+for (let i = 0; i < htmlTitleArry.length; i++) {
+  htmlTitleOptions.push(
+    `<option value="${htmlTitleArry[i]}" name="genre">${htmlTitleArry[i]}</option>`
+  );
+}
+
+const jsTitleArry = ['入門書', 'React', 'VanillaJS'];
+const jsTitleOptions = [];
+for (let i = 0; i < jsTitleArry.length; i++) {
+  jsTitleOptions.push(`<option value="${jsTitleArry[i]}" name="genre">${jsTitleArry[i]}</option>`);
+}
+
+const rootElm = document.getElementById('app');
+const genreSelectorHtml = `<select class="selector genreSelector">${genreOptions.join('')}</select>`;
+let titleSelectorHtml = `<select class="selector titleSelector">${htmlTitleOptions.join('')}</select>`;
+const searchBtnHtml = `<button class="searchBtn">検索</button>`;
+const parentElm = document.createElement('div');
+parentElm.innerHTML = genreSelectorHtml + titleSelectorHtml + searchBtnHtml;
+rootElm.appendChild(parentElm);
+
+const genreElm = parentElm.querySelector('.genreSelector');
+const titleElm = parentElm.querySelector('.titleSelector');
+genreElm.addEventListener('change', () => {
+  if (genreElm.value === 'HTML') {
+    titleElm.innerHTML = htmlTitleOptions.join('');
+  } else if (genreElm.value === 'JavaScript') {
+    titleElm.innerHTML = jsTitleOptions.join('');
+  }
+});
+```
+
+## 他の実装法の模索
+
+`innerHTML`プロパティ以外にも要素の中身をいじるものはいくつかあるようなので、少し調べてみました。
+
+### textContent
+
+要素のテキスト内容を示すプロパティ。  
+子孫のHTMLタグもそのまま文字列として返すので、書き換え内容がテキストのみの場合に使用する。  
+[Node.textContent - Web API | MDN](https://developer.mozilla.org/ja/docs/Web/API/Node/textContent)
+
+### innerText
+
+ブラウザで表示されているテキスト内容を示すプロパティ。  
+子孫のHTMLタグやstyle、非表示になっている要素は取得されず、本当にブラウザで見たまま。  
+`textContent`と同様に、書き換え内容がテキストのみの場合に使用する。が、パフォーマンスの面で`textContent`を推奨。  
+[HTMLElement.innerText - Web API | MDN](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText)
+
+### insertAdjacentHTML
+
+破壊的操作をせず、HTMLを指定箇所に挿入できる。  
+ただ上書きではなく追加なので、上書きするときは一度`element.textContent = '';`で空っぽにしてから追加かな…？  
+[element.insertAdjacentHTML - Web API | MDN](https://developer.mozilla.org/ja/docs/Web/API/Element/insertAdjacentHTML)
+
+ちなみに要素を追加するときは`insertAdjacentElement()`、テキストを追加するときは`insertAdjacentText()`を使用する。
+
+### innerHTMLの懸念点
+
+こうしてコンテンツの書き換えを調べてみると、やっぱり`innerHTML`って唯一無二じゃん🤟ってなるんですが重大な問題が。  
+すばり、セキュリティ～～～！！！  
+動的に要素を生成は、XSS攻撃のスキになっちゃうんですね。
+
+> HTML5では `innerHTML`で挿入された `<script>`タグは実行するべきではないと定義しているからです。
+>
+> <cite>
+>   [Element.innerHTML - Web API |
+>   MDN](https://developer.mozilla.org/ja/docs/Web/API/Element/innerHTML)
+> </cite>
+
+とあるので大丈夫なんじゃ？と思いますが、`script`タグを使わず攻撃される場合もあるので対策は必須。
+
+- 対策1  
+  プレーンテキストの場合は必ず`textContent`プロパティを使用する。
+
+- 対策2  
+  挿入する文字列にエスケープ処理をかける。  
+  下記の参考ページでは、正規表現でエスケープする方法と`createTextNode`でエスケープする方法が紹介されています。
+  [JavaScriptで特殊文字エスケープする３つの方法【htmlspecialchars的実装】 | PisukeCode - Web開発まとめ](https://pisuke-code.com/javascript-imple-htmlspecialchars/)
+
+試しに処理時間を簡単に調べてみました。
+
+- 正規表現 : 0.39013671875 ms
+- createTextNode : 0.549072265625 ms
+
+誤差レベルかなと思うので、私は可読性のある正規表現でのエスケープを使用していこうかなと思います。  
+`setHTML`プロパティのブラウザ対応はよ😇
+
+## おわり
+
+ということで、無事完成にもっていけたのでよかったです～  
+ちなみにこれは [ステップアップJavaScriptフロントエンド開発の初級から中級へ進むために](https://www.amazon.co.jp/%E3%82%B9%E3%83%86%E3%83%83%E3%83%97%E3%82%A2%E3%83%83%E3%83%97JavaScript-%E3%83%95%E3%83%AD%E3%83%B3%E3%83%88%E3%82%A8%E3%83%B3%E3%83%89%E9%96%8B%E7%99%BA%E3%81%AE%E5%88%9D%E7%B4%9A%E3%81%8B%E3%82%89%E4%B8%AD%E7%B4%9A%E3%81%B8%E9%80%B2%E3%82%80%E3%81%9F%E3%82%81%E3%81%AB-%E3%82%B5%E3%83%BC%E3%82%AF%E3%83%AB%E3%82%A2%E3%83%A9%E3%82%A6%E3%83%B3%E3%83%89%E6%A0%AA%E5%BC%8F%E4%BC%9A%E7%A4%BE/dp/4798169838) という本の総合演習の改造編での模索でした。（アフィリンクではないのでご安心を！）
+
+それでは、 ☁️ぼんっ
