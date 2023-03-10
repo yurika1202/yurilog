@@ -9,7 +9,9 @@ const meta = {
   title: '',
 };
 
-const allPosts = await getCollection('post');
+const allPosts = await getCollection('post', ({ data }) => {
+  return data.draft === false;
+});
 const sotedAllPosts = sortedPosts(allPosts);
 ---
 

@@ -8,6 +8,7 @@ import remarkCodeTitle from 'remark-code-title';
 // https://astro.build/config
 export default defineConfig({
   markdown: {
+    drafts: true,
     rehypePlugins: [
       rehypeSlug,
       [
