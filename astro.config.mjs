@@ -3,6 +3,7 @@ import mdx from '@astrojs/mdx';
 import rehypeSlug from 'rehype-slug';
 import rehypeToc from 'rehype-toc';
 import rehypeExternalLinks from 'rehype-external-links';
+import { rehypeAccessibleEmojis } from 'rehype-accessible-emojis';
 import remarkCodeTitle from 'remark-code-title';
 import remarkGemoji from 'remark-gemoji';
 
@@ -26,6 +27,7 @@ export default defineConfig({
           rel: 'nofollow',
         },
       ],
+      rehypeAccessibleEmojis,
     ],
     remarkPlugins: [remarkCodeTitle, remarkGemoji],
   },
