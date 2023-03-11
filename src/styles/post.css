@@ -209,11 +209,11 @@ table.table_col tbody tr:not(:last-of-type) th {
 }
 
 .post img {
-  margin: 0 auto;
+  margin: 1.2em auto 0;
   border: solid 1px
     hsla(var(--c-primary-h), var(--c-primary-s), var(--c-primary-l), var(--c-primary-a));
   border-radius: 5px;
-  max-width: 100%;
+  max-width: 80%;
 }
 
 .cp_embed_wrapper + p {
