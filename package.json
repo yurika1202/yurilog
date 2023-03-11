@@ -31,7 +31,8 @@
     "rehype-external-links": "^2.0.1",
     "rehype-slug": "^5.1.0",
     "rehype-toc": "^3.0.2",
-    "remark-code-title": "^0.2.5"
+    "remark-code-title": "^0.2.5",
+    "remark-gemoji": "^7.0.1"
   },
   "browserslist": [
     "last 2 versions",
