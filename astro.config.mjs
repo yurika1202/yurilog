@@ -9,6 +9,7 @@ import remarkGemoji from 'remark-gemoji';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://yurika1202.com/',
   markdown: {
     drafts: true,
     rehypePlugins: [

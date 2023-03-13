@@ -14,7 +14,8 @@ const {
 } = Astro.props as Props;
 
 const siteTitle = title ? `${title} | ${SITE.title}` : `${SITE.title}`;
-const ogImageURL = new URL(ogImage, Astro.url.origin);
+const canonicalURL = new URL(Astro.url, Astro.site);
+const ogImageURL = new URL(ogImage, Astro.url).href;
 ---
 
 <meta charset="UTF-8" />
@@ -27,16 +28,19 @@ const ogImageURL = new URL(ogImage, Astro.url.origin);
 <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32" />
 <link rel="apple-touch-icon" type="image/png" href="/apple-touch-icon.png" sizes="180x180" />
 <link rel="manifest" href="/manifest.json" />
+
+<link rel="canonical" href={canonicalURL} />
+
 <!-- OGP -->
 <meta property="og:title" content={siteTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:site_name" content={siteTitle} />
-<meta property="og:url" content={Astro.url} />
+<meta property="og:url" content={canonicalURL} />
 <meta property="og:image" content={ogImageURL} />
 <meta property="og:locale" content="ja_JP" />
 <meta property="og:type" content="website" />
 <meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:url" content={canonicalURL} />
 <meta property="twitter:title" content={siteTitle} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={ogImageURL} />
