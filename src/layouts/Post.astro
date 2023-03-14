@@ -34,8 +34,17 @@ const meta = {
 
 <style>
   article {
-    margin-top: var(--size-space-xl);
+    margin: var(--size-space-xl) auto 0;
+    padding: 0 var(--size-space-xl);
+    max-width: 800px;
   }
+
+  @media (max-width: 959px) {
+    article {
+      padding: 0 3vw;
+    }
+  }
+
   h1 {
     font-weight: bold;
     font-size: 1.75rem;
