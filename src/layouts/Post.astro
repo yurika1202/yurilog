@@ -10,7 +10,11 @@ const meta = {
   description: description,
   ogImage: postOgImage,
 };
+const postURL = new URL(Astro.url, Astro.site).href;
+const shareURL = postURL.endsWith('/') ? postURL.slice(0, -1) : postURL;
 ---
+
+<script></script>
 
 <BaseLayout meta={meta}>
   <article>
@@ -30,6 +34,25 @@ const meta = {
       <slot />
     </div><!-- /.post -->
   </article>
+  <div class="share">
+    <ul>
+      <li>
+        <a
+          href={`http://twitter.com/share?url=${shareURL}&text=${title}%0a`}
+          target="_blank"
+          rel="nofollow"
+        >
+          Twitter
+        </a>
+      </li>
+      <li>
+        <a href={`http://www.facebook.com/share.php?u=${shareURL}`} rel="nofollow" target="_blank">
+          facebook
+        </a>
+      </li>
+      <li></li>
+    </ul>
+  </div><!-- /.share -->
 </BaseLayout>
 
 <style>
@@ -54,5 +77,10 @@ const meta = {
     display: flex;
     justify-content: flex-end;
     gap: var(--size-space-md);
+  }
+
+  button {
+    width: 100px;
+    height: 100px;
   }
 </style>
