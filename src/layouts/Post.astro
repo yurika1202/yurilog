@@ -14,8 +14,6 @@ const postURL = new URL(Astro.url, Astro.site).href;
 const shareURL = postURL.endsWith('/') ? postURL.slice(0, -1) : postURL;
 ---
 
-<script></script>
-
 <BaseLayout meta={meta}>
   <article>
     <h1>{title}</h1>
@@ -50,7 +48,9 @@ const shareURL = postURL.endsWith('/') ? postURL.slice(0, -1) : postURL;
           facebook
         </a>
       </li>
-      <li></li>
+      <li>
+        <button id="copyBtn">クリップボードにコピー</button>
+      </li>
     </ul>
   </div><!-- /.share -->
 </BaseLayout>
@@ -79,8 +79,65 @@ const shareURL = postURL.endsWith('/') ? postURL.slice(0, -1) : postURL;
     gap: var(--size-space-md);
   }
 
-  button {
-    width: 100px;
-    height: 100px;
+  button#copyBtn {
+    position: relative;
+  }
+
+  button#copyBtn::after {
+    display: inline-block;
+    position: absolute;
+    top: -65%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: hsla(
+      var(--c-primary-h),
+      var(--c-primary-s),
+      var(--c-light80-l),
+      var(--c-primary-a)
+    );
+    padding: 0.3em 0.5em;
+    font-weight: bold;
+    font-size: 0.75rem;
+  }
+
+  button#copyBtn.is_active::after {
+    width: 120px;
+    content: 'コピーしました🥳';
+  }
+
+  button#copyBtn.is_active_error::after {
+    width: 150px;
+    content: 'コピーができません🤕';
   }
 </style>
+
+<script define:vars={{ shareURL }}>
+  const copyBtn = document.getElementById('copyBtn');
+
+  const copyToClipboard = (copyText, target) => {
+    if (navigator.clipboard) {
+      return navigator.clipboard.writeText(copyText).then(function () {
+        messageActive(target);
+      });
+    } else {
+      messageActiveError(target);
+    }
+  };
+  const messageActive = target => {
+    target.classList.add('is_active');
+    setTimeout(() => {
+      target.classList.remove('is_active');
+    }, 1800);
+  };
+
+  const messageActiveError = target => {
+    target.classList.add('is_active_error');
+    setTimeout(() => {
+      target.classList.remove('is_active_error');
+    }, 1800);
+  };
+
+  copyBtn.addEventListener('click', () => {
+    copyToClipboard(shareURL, copyBtn);
+  });
+</script>
